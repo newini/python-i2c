@@ -5,7 +5,8 @@
 #=================================
 
 
-import datetime, time
+from datetime import datetime
+import time
 
 # https://pypi.org/project/smbus2/
 import smbus2
@@ -37,7 +38,7 @@ bus.write_byte_data(
         INIT_CMD
         )
 
-time.sleep(.1) # .1s
+time.sleep(.1) # .1 s
 
 
 #=================================
@@ -55,10 +56,10 @@ while (True):
             0x00, # Read R : '1' , write W : '0'
             write_data)
 
-    current_datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    current_datetime_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # Sleep at least 75 ms
-    time.sleep(1) # 1s
+    time.sleep(.1) # .1 s
 
     # Read 6 bytes of data
     read_data = bus.read_i2c_block_data(
@@ -80,3 +81,6 @@ while (True):
 
     print('{0}, Humidity: {1:.2f} %, Temperature: {2:.2f} C'.format(current_datetime_str, humidity, temperature) )
 
+    # Wait till next second
+    sleep_time = 10**6 - datetime.utcnow().microsecond # in micro second
+    time.sleep(sleep_time/10**6) # in second
