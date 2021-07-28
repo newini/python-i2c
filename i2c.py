@@ -5,7 +5,7 @@
 #=================================
 
 
-import time
+import datetime, time
 
 # https://pypi.org/project/smbus2/
 import smbus2
@@ -55,6 +55,8 @@ while (True):
             0x00, # Read R : '1' , write W : '0'
             write_data)
 
+    current_datetime_str = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
     # Sleep at least 75 ms
     time.sleep(1) # 1s
 
@@ -76,5 +78,5 @@ while (True):
     humidity = humidity_data/(2**20)*100 # in %
     temperature = temperature_data/(2**20)*200 - 50 # in C
 
-    print('Humidity: {0:.2f} %, Temperature: {1:.2f} C'.format(humidity, temperature) )
+    print('{0}, Humidity: {1:.2f} %, Temperature: {2:.2f} C'.format(current_datetime_str, humidity, temperature) )
 
