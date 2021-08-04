@@ -1,18 +1,28 @@
 #!/bin/env python3
+# -*- coding: utf-8 -*-
 # i2c.py
-#=================================
-# Author: Eunchong Kim
-#=================================
+"""
+Use I2C to read huminity and temperature data, by using smbus2
+"""
+
+__author__      = "Eunchong Kim"
+__copyright__   = "Copyright 2021, Eunchong Kim"
+__credits__     = ["Eunchong Kim"]
+__license__     = "GPL"
+__version__     = "1.0.0"
+__maintainer__  = "Eunchong Kim"
+__email__       = "chariskimec@gmail.com"
+__status__      = "Production"
 
 
+#================================================
 from datetime import datetime
 import time
-
 # https://pypi.org/project/smbus2/
 import smbus2
 
 
-#=================================
+#================================================
 # Static variables
 # About device
 DEVICE_BUS = 0
@@ -26,10 +36,9 @@ DATA0           = 0b0011_0011
 DATA1           = 0b0000_0000
 
 
-#=================================
+#================================================
 # Create bus
 bus = smbus2.SMBus(DEVICE_BUS)
-
 
 # Initialize
 bus.write_byte_data(
@@ -41,7 +50,7 @@ bus.write_byte_data(
 time.sleep(.1) # .1 s
 
 
-#=================================
+#================================================
 # Loop
 write_data = [
         TRIGGER_MEAS,
