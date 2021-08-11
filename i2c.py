@@ -24,46 +24,52 @@ import smbus2
 
 #================================================
 # Static variables
-# About device
 DEVICE_BUS = 0
-DEVICE_ADDRESS = 0x38
 
+# For AHT10
+AHT10_ADDR = 0x38
 # commands
-INIT_CMD        = 0b1110_0001 # Initialization command
-TRIGGER_MEAS    = 0b1010_1100 # Trigger measurement. need to wait at least 75 ms
-SOFTRESET       = 0b1011_1010 # Restart the sensor system. need to wait at least 20 ms
-DATA0           = 0b0011_0011
-DATA1           = 0b0000_0000
+AHT10_INIT_CMD      = 0b1110_0001 # Initialization command
+AHT10_TRIG_MEAS     = 0b1010_1100 # Trigger measurement. need to wait at least 75 ms
+AHT10_SOFT_RESET    = 0b1011_1010 # Restart the sensor system. need to wait at least 20 ms
+AHT10_DATA0         = 0b0011_0011
+AHT10_DATA1         = 0b0000_0000
+
+# For CCS811 (CJMCU-811)
+CCS811_ADDR = 0x5a
+# commands
 
 
 #================================================
-# Create bus
+# Create bus and initialize
 bus = smbus2.SMBus(DEVICE_BUS)
 
-# Initialize
+# For AHT10
 bus.write_byte_data(
-        DEVICE_ADDRESS,
+        AHT10_ADDR,
         0x00, # Read R : '1' , write W : '0'
-        INIT_CMD
+        AHT10_INIT_CMD
         )
 
 time.sleep(.1) # .1 s
 
+# For CCS811
+
 
 #================================================
 # Loop
-write_data = [
-        TRIGGER_MEAS,
-        DATA0,
-        DATA1
+aht10_write_data = [
+        AHT10_TRIG_MEAS,
+        AHT10_DATA0,
+        AHT10_DATA1
         ]
 
 while (True):
     # Write trigger measurement
     bus.write_i2c_block_data(
-            DEVICE_ADDRESS,
+            AHT10_ADDR,
             0x00, # Read R : '1' , write W : '0'
-            write_data)
+            aht10_write_data)
 
     current_datetime_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -72,7 +78,7 @@ while (True):
 
     # Read 6 bytes of data
     read_data = bus.read_i2c_block_data(
-            DEVICE_ADDRESS,
+            AHT10_ADDR,
             0x01, # Read R : '1' , write W : '0'
             6 # 6 bytes
             )
