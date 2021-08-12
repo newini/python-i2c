@@ -3,6 +3,7 @@
 # devices/aht10.py
 
 import logging, time
+# https://pypi.org/project/smbus2/
 from smbus2 import SMBus
 
 
