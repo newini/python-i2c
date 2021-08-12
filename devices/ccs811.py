@@ -21,7 +21,11 @@ class CCS811:
     """
     CCS811 -- the board name is CJMCU-811 --
     can measure equivalent CO2 (eCO2) in ppm
-    and Total Volatile Organic Compound (TVOC) in ppb
+    and Total Volatile Organic Compound (TVOC) in ppb.
+
+    CAUTION
+    DO NOT USE single transaction such as bus.write_byte, it doew not work.
+    Use bus.i2c_rdwr( i2c_msg ), instead.
     """
     def __init__(self, bus_n=0, addr=0x5a):
         self._bus = SMBus(bus_n)
@@ -30,23 +34,23 @@ class CCS811:
 
     def initialize(self):
         # Start application mode
-        self._bus.write_byte_data(
+        write_msg = i2c_msg.write(
                 self._addr,
-                0, # write
-                CCS811_APP_START_ADDR
+                [CCS811_APP_START_ADDR]
                 )
+        self._bus.i2c_rdwr(write_msg)
         time.sleep(.1) # .1 s
         logging.info('CCS811 initialized.')
 
         # Set measurement mode
-        self._bus.write_i2c_block_data(
+        write_msg = i2c_msg.write(
                 self._addr,
-                0, # write
                 [
                     CCS811_MEAS_MODE_ADDR,
                     CCS811_MEAS_MODE_CMD
-                ]
+                    ]
                 )
+        self._bus.i2c_rdwr(write_msg)
         time.sleep(.1) # .1 s
         logging.info('CCS811 set to measurement mode.')
 
