@@ -1,6 +1,6 @@
 #!/bin/env python3
 # -*- coding: utf-8 -*-
-# i2c.py
+# main.py
 """
 Use I2C to read huminity and temperature data, by using smbus2
 """
