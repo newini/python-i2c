@@ -52,7 +52,8 @@ while (True):
     logging.info('Humidity: {0:.2f} %, Temperature: {1:.2f} C'.format(humidity, temperature) )
 
     eCO2, TVOC = ccs811.getECO2TVOC()
-    logging.info('eCO2: {0} ppm, TVOC: {1} ppb'.format(eCO2, TVOC))
+    if eCO2 != -1 and TVOC != -1:
+        logging.info('eCO2: {0} ppm, TVOC: {1} ppb'.format(eCO2, TVOC))
 
     # Wait till next second
     sleep_time = 10**6 - datetime.utcnow().microsecond # in micro second
