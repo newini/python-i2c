@@ -5,6 +5,7 @@
 import logging, time
 # https://pypi.org/project/smbus2/
 from smbus2 import SMBus
+from pyi2c import getBit
 
 
 # AHT10 address
@@ -62,6 +63,11 @@ class AHT10:
 
         # Treat status code
         status = read_data[0]
+        is_valid = False
+        if getBit(status, 7) == 1:
+            logging.warning('AHT10 is busy')
+        else:
+            is_valid = True
 
         # Fill data
         humidity_data = (read_data[1] << 12) + (read_data[2] << 4) + (read_data[3] & 0xf0)
@@ -71,7 +77,10 @@ class AHT10:
         humidity = humidity_data/(2**20)*100 # in %
         temperature = temperature_data/(2**20)*200 - 50 # in C
 
-        return humidity, temperature
+        if is_valid:
+            return humidity, temperature
+        else:
+            return -1, -1
 
 
 # Test main
