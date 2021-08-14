@@ -3,9 +3,7 @@
 # devices/aht10.py
 
 import logging, time
-# https://pypi.org/project/smbus2/
-from smbus2 import SMBus
-from pyi2c import getBit
+from pyi2c import I2CDevice, getBit
 
 
 # AHT10 address
@@ -23,43 +21,29 @@ class AHT10:
     AHT10 Class to get humidity and temperature
     """
     def __init__(self, bus_n=0, addr=0x38):
-        self._bus = SMBus(bus_n)
-        self._addr = addr
+        self._i2cdevice = I2CDevice(bus_n, addr)
         logging.info('AHT10 created.')
 
     def initialize(self):
-        self._bus.write_byte_data(
-                self._addr,
-                0x00, # Read R : '1' , write W : '0'
-                AHT10_INIT_CMD
-                )
+        self._i2cdevice.write(AHT10_INIT_CMD)
         # Sleep
         time.sleep(.1) # .1 s
         logging.info('AHT10 initialized.')
 
     def getHumidityTemperature(self):
+        # Write trigger measurement
         write_data = [
             AHT10_TRIG_MEAS,
             AHT10_DATA0,
             AHT10_DATA1
             ]
-
-        # Write trigger measurement
-        self._bus.write_i2c_block_data(
-                AHT10_ADDR,
-                0x00, # Read R : '1' , write W : '0'
-                write_data
-                )
+        self._i2cdevice.write(write_data)
 
         # Sleep at least 75 ms
         time.sleep(.1) # .1 s
 
         # AHT10, read 6 bytes of data
-        read_data = self._bus.read_i2c_block_data(
-                AHT10_ADDR,
-                0x01, # Read R : '1' , write W : '0'
-                6 # 6 bytes
-                )
+        read_data = self._i2cdevice.read(6)
 
         # Treat status code
         status = read_data[0]
