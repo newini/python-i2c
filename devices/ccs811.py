@@ -105,7 +105,7 @@ class CCS811:
 # Test main
 def main():
     logging.basicConfig(
-            format='%(asctime)s %(message)s',
+            format='%(asctime)s %(levelname)s %(message)s',
             level=logging.DEBUG
             )
     ccs811 = CCS811()

@@ -82,7 +82,7 @@ class AHT10:
 # Test main
 def main():
     logging.basicConfig(
-            format='%(asctime)s %(message)s',
+            format='%(asctime)s %(levelname)s %(message)s',
             level=logging.DEBUG
             )
     aht10 = AHT10()
