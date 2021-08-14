@@ -7,35 +7,42 @@ from pyi2c import I2CDevice, getBit
 
 
 # AHT10 address
-AHT10_ADDR = 0x38
 # commands
-AHT10_INIT_CMD      = 0b1110_0001 # 0xe1. Initialization command
-AHT10_TRIG_MEAS     = 0b1010_1100 # 0xac. Trigger measurement. need to wait at least 75 ms
-AHT10_SOFT_RESET    = 0b1011_1010 # Restart the sensor system. need to wait at least 20 ms
-AHT10_DATA0         = 0b0011_0011 # 0x33
-AHT10_DATA1         = 0b0000_0000 # 0x00
 
 
 class AHT10:
     """
-    AHT10 Class to get humidity and temperature
+    AHT10 Class to get humidity and temperature.
+    Address is 0x38
     """
     def __init__(self, bus_n=0, addr=0x38):
-        self._i2cdevice = I2CDevice(bus_n, addr)
+        self._i2cdevice     = I2CDevice(bus_n, addr)
+        self._INIT_CMD      = 0b1110_0001 # 0xe1. Initialization command
+        self._TRIG_MEAS     = 0b1010_1100 # 0xac. Trigger measurement. need to wait at least 75 ms
+        self._SOFT_RESET    = 0b1011_1010 # Restart the sensor system. need to wait at least 20 ms
+        self._DATA0         = 0b0011_0011 # 0x33
+        self._DATA1         = 0b0000_0000 # 0x00
+
         logging.info('AHT10 created.')
 
     def initialize(self):
-        self._i2cdevice.write(AHT10_INIT_CMD)
+        self._i2cdevice.write(self._INIT_CMD)
         # Sleep
         time.sleep(.1) # .1 s
         logging.info('AHT10 initialized.')
 
+    def softReset(self):
+        self._i2cdevice.write(self._SOFT_RESET)
+        # Sleep at lease 20 ms
+        time.sleep(.1) # .1 s
+        logging.info('AHT10 did soft reset.')
+
     def getHumidityTemperature(self):
         # Write trigger measurement
         write_data = [
-            AHT10_TRIG_MEAS,
-            AHT10_DATA0,
-            AHT10_DATA1
+            self._TRIG_MEAS,
+            self._DATA0,
+            self._DATA1
             ]
         self._i2cdevice.write(write_data)
 
@@ -47,11 +54,10 @@ class AHT10:
 
         # Treat status code
         status = read_data[0]
-        is_valid = False
+        is_valid = True
         if getBit(status, 7) == 1:
             logging.warning('AHT10 is busy')
-        else:
-            is_valid = True
+            is_valid = False
 
         # Fill data
         humidity_data = (read_data[1] << 12) + (read_data[2] << 4) + (read_data[3] & 0xf0)
@@ -60,6 +66,12 @@ class AHT10:
         # Convert
         humidity = humidity_data/(2**20)*100 # in %
         temperature = temperature_data/(2**20)*200 - 50 # in C
+
+        # Check value
+        if temperature > 85:
+            logging.warning('AHT10 temperature value is too hish.')
+            self.softReset()
+            is_valid = False
 
         if is_valid:
             return humidity, temperature
