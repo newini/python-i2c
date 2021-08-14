@@ -3,18 +3,7 @@
 # devices/ccs811.py
 
 import logging, time
-# https://pypi.org/project/smbus2/
-from smbus2 import SMBus, i2c_msg
-
-
-# CCS811 (CJMCU-811) address
-CCS811_ADDR = 0x5a
-# commands
-CCS811_APP_START_ADDR = 0xf4 # from boot to application mode
-CCS811_MEAS_MODE_ADDR = 0x01
-# 0: write, 001: every second, 0: nINT interrupt disable, 0: operate normally, 00: nothing
-CCS811_MEAS_MODE_CMD = 0b0001_0000
-CCS811_RESULT_ADDR = 0x02
+from pyi2c import I2CDevice, getBit
 
 
 class CCS811:
@@ -23,45 +12,37 @@ class CCS811:
     can measure equivalent CO2 (eCO2) in ppm
     and Total Volatile Organic Compound (TVOC) in ppb.
 
+    Address is 0x5a, or 0x5b
+
     CAUTION
-    DO NOT USE single transaction such as bus.write_byte, it doew not work.
+    DO NOT USE single transaction such as bus.write_byte, it does not work.
     Use bus.i2c_rdwr( i2c_msg ), instead.
     """
     def __init__(self, bus_n=0, addr=0x5a):
-        self._bus = SMBus(bus_n)
-        self._addr = addr
+        self._i2cdevice = I2CDevice(bus_n, addr)
+        # commands
+        self._APP_START_ADDR = 0xf4 # from boot to application mode
+        self._MEAS_MODE_ADDR = 0x01
+        # 0: write, 001: every second, 0: nINT interrupt disable, 0: operate normally, 00: nothing
+        self._MEAS_MODE_CMD = 0b0001_0000 # 0x10
+        self._RESULT_ADDR = 0x02
         logging.info('CCS811 created.')
 
     def initialize(self):
         # Start application mode
-        write_msg = i2c_msg.write(
-                self._addr,
-                [CCS811_APP_START_ADDR]
-                )
-        self._bus.i2c_rdwr(write_msg)
+        self._i2cdevice.write(self._APP_START_ADDR)
         time.sleep(.1) # .1 s
         logging.info('CCS811 initialized.')
 
         # Set measurement mode
-        write_msg = i2c_msg.write(
-                self._addr,
-                [
-                    CCS811_MEAS_MODE_ADDR,
-                    CCS811_MEAS_MODE_CMD
-                    ]
-                )
-        self._bus.i2c_rdwr(write_msg)
+        self._i2cdevice.write([self._MEAS_MODE_ADDR, self._MEAS_MODE_CMD])
         time.sleep(.1) # .1 s
         logging.info('CCS811 set to measurement mode.')
 
     def getECO2TVOC(self):
         # Select result register address
         # and read 8 bytes data rapidly
-        write = i2c_msg.write(self._addr, [CCS811_RESULT_ADDR])
-        read = i2c_msg.read(self._addr, 8) # 8 bytes
-        self._bus.i2c_rdwr(write, read)
-        # Convert i2c_msg list to integer list
-        read_data = list(read)
+        read_data = self._i2cdevice.writeread(self._RESULT_ADDR, 8)
 
         # Fill data
         eCO2 = (read_data[0] << 8) + read_data[1] # equivalent CO2. from 400 ppm to 8192 ppm
