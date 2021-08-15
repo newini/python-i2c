@@ -39,21 +39,9 @@ class CCS811:
         time.sleep(.1) # .1 s
         logging.info('CCS811 set to measurement mode.')
 
-    def getECO2TVOC(self):
-        # Select result register address
-        # and read 8 bytes data rapidly
-        read_data = self._i2cdevice.writeread(self._RESULT_ADDR, 8)
-
-        # Fill data
-        eCO2 = (read_data[0] << 8) + read_data[1] # equivalent CO2. from 400 ppm to 8192 ppm
-        TVOC = (read_data[2] << 8) + read_data[3] # Total Volatile Organic Compound. from 0 ppb to 1187 ppb
-        status = read_data[4]
-        error_id = read_data[5]
-        current = read_data[6] & 0b1111_1100
-        raw_adc = (read_data[6] & 0b0000_0011) + read_data[7]
-
-        # Treat status
-        is_valid_data = False
+    # Return True when there is no problem
+    def interpretStatus(self, status):
+        is_ok = False
         if not status & 2**0 == 0:
             logging.warning('CCS811 has error')
             if not error_id & 2**0 == 0:
@@ -75,12 +63,31 @@ class CCS811:
         elif status & 2**7 == 0:
             logging.info('CCS811 is not in application mode')
         else:
-            is_valid_data = True
+            is_ok = True
+        return is_ok
 
-        if is_valid_data:
-            return eCO2, TVOC
-        else:
-            return -1, -1
+    def getECO2TVOC(self):
+        # Select result register address
+        # and read 8 bytes data rapidly
+        read_data = self._i2cdevice.writeread(self._RESULT_ADDR, 8)
+
+        # Prepare varibles
+        eCO2 = TVOC = -1
+
+        # Check i2c status code is success
+        if self._i2cdevice.status_code.value == 0:
+
+            # Treat status
+            status = read_data[4]
+            if self.interpretStatus(status):
+                # Fill data
+                eCO2 = (read_data[0] << 8) + read_data[1] # equivalent CO2. from 400 ppm to 8192 ppm
+                TVOC = (read_data[2] << 8) + read_data[3] # Total Volatile Organic Compound. from 0 ppb to 1187 ppb
+                error_id = read_data[5]
+                current = read_data[6] & 0b1111_1100
+                raw_adc = (read_data[6] & 0b0000_0011) + read_data[7]
+
+        return eCO2, TVOC
 
 
 # Test main

@@ -52,31 +52,32 @@ class AHT10:
         # AHT10, read 6 bytes of data
         read_data = self._i2cdevice.read(6)
 
-        # Treat status code
-        status = read_data[0]
-        is_valid = True
-        if getBit(status, 7) == 1:
-            logging.warning('AHT10 is busy')
-            is_valid = False
+        # Prepare variables
+        humidity = temperature = -1
 
-        # Fill data
-        humidity_data = (read_data[1] << 12) + (read_data[2] << 4) + (read_data[3] & 0xf0)
-        temperature_data = ((read_data[3] & 0x0f) << 16) + (read_data[4] << 8) + read_data[5]
+        # Check i2c status code is success
+        if self._i2cdevice.status_code.value == 0:
 
-        # Convert
-        humidity = humidity_data/(2**20)*100 # in %
-        temperature = temperature_data/(2**20)*200 - 50 # in C
+            # Treat status code
+            status = read_data[0]
+            if getBit(status, 7) == 1:
+                logging.warning('AHT10 is busy')
+            else:
+                # Fill data
+                humidity_data = (read_data[1] << 12) + (read_data[2] << 4) + (read_data[3] & 0xf0)
+                temperature_data = ((read_data[3] & 0x0f) << 16) + (read_data[4] << 8) + read_data[5]
 
-        # Check value
-        if temperature > 85:
-            logging.warning('AHT10 temperature value is too hish.')
-            self.softReset()
-            is_valid = False
+                # Convert
+                humidity = humidity_data/(2**20)*100 # in %
+                temperature = temperature_data/(2**20)*200 - 50 # in C
 
-        if is_valid:
-            return humidity, temperature
-        else:
-            return -1, -1
+                # Check value
+                if temperature > 85:
+                    logging.warning('AHT10 temperature value is too hish.')
+                    self.softReset()
+                    humidity = temperature = -1
+
+        return humidity, temperature
 
 
 # Test main
