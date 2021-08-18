@@ -26,6 +26,7 @@ class CCS811:
         # 0: write, 001: every second, 0: nINT interrupt disable, 0: operate normally, 00: nothing
         self._MEAS_MODE_CMD = 0b0001_0000 # 0x10
         self._RESULT_ADDR = 0x02
+        self._SW_RESET = 0xff
         logging.info('CCS811 created.')
 
     def initialize(self):
@@ -38,6 +39,14 @@ class CCS811:
         self._i2cdevice.write([self._MEAS_MODE_ADDR, self._MEAS_MODE_CMD])
         time.sleep(.1) # .1 s
         logging.info('CCS811 set to measurement mode.')
+
+    def softReset(self):
+        data = [
+                self._SW_RESET, 0x11, 0xE5, 0x72, 0x8A
+                ]
+        self._i2cdevice.write(data)
+        time.sleep(.1) # .1 s
+        logging.info('CCS811 did soft reset and return to boot mode.')
 
     # Return True when there is no problem
     def interpretStatus(self, status, error_id):
@@ -56,6 +65,8 @@ class CCS811:
                 logging.warning(' -- HEATER_FAULT. The Heater current in the CCS811 is not in range')
             elif not error_id & 2**5 == 0:
                 logging.warning(' -- HEATER_SUPPLY. The Heater voltage is not being applied correctly')
+            self.softReset()
+            self.initialize()
         elif status & 2**3 == 0:
             logging.info('CCS811 has no new data')
         elif status & 2**4 == 0:
