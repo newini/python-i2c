@@ -40,7 +40,7 @@ class CCS811:
         logging.info('CCS811 set to measurement mode.')
 
     # Return True when there is no problem
-    def interpretStatus(self, status):
+    def interpretStatus(self, status, error_id):
         is_ok = False
         if not status & 2**0 == 0:
             logging.warning('CCS811 has error')
@@ -79,11 +79,11 @@ class CCS811:
 
             # Treat status
             status = read_data[4]
-            if self.interpretStatus(status):
+            error_id = read_data[5]
+            if self.interpretStatus(status, error_id):
                 # Fill data
                 eCO2 = (read_data[0] << 8) + read_data[1] # equivalent CO2. from 400 ppm to 8192 ppm
                 TVOC = (read_data[2] << 8) + read_data[3] # Total Volatile Organic Compound. from 0 ppb to 1187 ppb
-                error_id = read_data[5]
                 current = read_data[6] & 0b1111_1100
                 raw_adc = (read_data[6] & 0b0000_0011) + read_data[7]
 
