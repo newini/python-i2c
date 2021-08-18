@@ -1,5 +1,10 @@
 from django.shortcuts import render
-from django.http import HttpResponse
+
+from .models import Data
 
 def index(request):
-    return HttpResponse("Hello, world. You're at the polls index.")
+    data_list = Data.objects.all()
+    context = {
+            'data_list': data_list
+            }
+    return render(request, 'index.html', context)

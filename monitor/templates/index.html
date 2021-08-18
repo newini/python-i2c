@@ -1,0 +1,12 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+  {% if data_list %}
+    {% for data in data_list %}
+      <li>{{ data.created_at }}</li>
+      <li>{{ data.huminity }}</li>
+    {% endfor %}
+  {% endif %}
+
+{% endblock %}
