@@ -21,7 +21,7 @@ pip3 install pyi2c
 
 ### 1.3 Run
 ```
-python3 i2c.py
+python3 start_measurement.py
 ```
 
 Data will be saved to `db.sqlite3`.
