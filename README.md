@@ -1,25 +1,59 @@
 # Use python smbus2 to I2C between Pi and I2C device
 
 
-## I2C Devices
+## 1. I2C
+
+### 1.1 I2C Devices
 - AHT10: measures Humidity in % and temperature in Celcius.
 - CCS811(board name is CJMCU-811): measures equivalent CO2 in ppm and Total Volatile Organic Compound in ppb.
 
 
-## Preperation
+### 1.2 Preperation
 Used python packages:
+- pyi2c
 - smbus2
 
 Install python packages
 ```
-pip3 install smbus2
+pip3 install pyi2c
 ```
 
 
-## Run
+### 1.3 Run
 ```
-python3 main.py
+python3 i2c.py
 ```
+
+Data will be saved to `db.sqlite3`.
+
+
+## 2. Webserver
+
+### 2.1 Preperation
+- django
+- plotly
+- dash
+```
+pip3 install django plotly dash
+```
+
+
+### 2.2 Run
+```
+./runserver.sh
+```
+
+
+## For developers
+### Reset
+```
+python3 manage.py migrate --fake monitor zero
+find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
+find . -path "*/migrations/*.pyc"  -delete
+python3 manage.py makemigrations
+python3 manage.py migrate --fake-initial
+```
+[How to Reset Migrations](https://simpleisbetterthancomplex.com/tutorial/2016/07/26/how-to-reset-migrations.html)
 
 
 ## Datasheets
