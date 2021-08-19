@@ -2,36 +2,44 @@
 
 {% block content %}
 
+<div class="container-fluid">
+
   <div class='row'>
-    {% if temperature_graph %}
-      <div style="width:800; height:600">
-        {{ temperature_graph|safe }}
-      </div>
-    {% endif %}
+    <div class='col-lg-6'>
+      {% if temperature_graph %}
+        <div>
+          {{ temperature_graph|safe }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class='col-lg-6'>
+      {% if humidity_graph %}
+        <div>
+          {{ humidity_graph|safe }}
+        </div>
+      {% endif %}
+    </div>
   </div>
 
   <div class='row'>
-    {% if humidity_graph %}
-      <div style="width:800; height:600">
-        {{ humidity_graph|safe }}
-      </div>
-    {% endif %}
+    <div class='col-lg-6'>
+      {% if eCO2_graph %}
+        <div>
+          {{ eCO2_graph|safe }}
+        </div>
+      {% endif %}
+    </div>
+
+    <div class='col-lg-6'>
+      {% if TVOC_graph %}
+        <div>
+          {{ TVOC_graph|safe }}
+        </div>
+      {% endif %}
+    </div>
   </div>
 
-  <div class='row'>
-    {% if eCO2_graph %}
-      <div style="width:800; height:600">
-        {{ eCO2_graph|safe }}
-      </div>
-    {% endif %}
-  </div>
-
-  <div class='row'>
-    {% if TVOC_graph %}
-      <div style="width:800; height:600">
-        {{ TVOC_graph|safe }}
-      </div>
-    {% endif %}
-  </div>
+</div>
 
 {% endblock %}
