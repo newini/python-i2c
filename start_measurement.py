@@ -51,7 +51,7 @@ cur = con.cursor()
 
 #================================================
 # Loop
-wrong_cnt = 0
+error_cnt = 0
 while (True):
     current_datetime_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
@@ -64,7 +64,7 @@ while (True):
 
     # Check data
     if humidity == temperature == -1 or eCO2 == TVOC == -1:
-        wrong_cnt += 1
+        error_cnt += 1
     else:
         cur.execute('INSERT INTO monitor_data (created_at, humidity, temperature, eCO2, TVOC) VALUES (?, ?, ?, ?, ?)',
                 (datetime.now(), humidity, temperature, eCO2, TVOC)
@@ -72,7 +72,7 @@ while (True):
         con.commit()
 
     # Stop if wrong data count >= 10
-    if wrong_cnt >= 10:
+    if error_cnt >= 10:
         logging.error('Something wrong. Stop')
         break
 
