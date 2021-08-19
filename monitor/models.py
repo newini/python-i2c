@@ -6,8 +6,8 @@ class Data(models.Model):
     """
 
     # Fields
-    create_at = models.DateTimeField(help_text='Created Datetime')
-    huminity = models.FloatField(help_text='Huminity')
+    created_at = models.DateTimeField(help_text='Created Datetime')
+    humidity = models.FloatField(help_text='Humidity')
     temperature = models.FloatField(help_text='Temperature')
     eCO2 = models.IntegerField(help_text='eCO2')
     TVOC = models.IntegerField(help_text='TVOC')
