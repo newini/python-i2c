@@ -1,6 +1,6 @@
 #!/bin/env python3
 # -*- coding: utf-8 -*-
-# start_measurement.py
+# i2c.py
 """
 Use I2C to read humidity and temperature data, by using smbus2
 """
