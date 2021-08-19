@@ -98,6 +98,11 @@ class CCS811:
                 current = read_data[6] & 0b1111_1100
                 raw_adc = (read_data[6] & 0b0000_0011) + read_data[7]
 
+                # Check value
+                if eCO2 < 400:
+                    logging.warning('CCS811 eCO2 value is strange.')
+                    eCO2 = TVOC = -1
+
         return eCO2, TVOC
 
 
