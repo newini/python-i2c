@@ -13,18 +13,31 @@ class Graph(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(Graph, self).get_context_data(**kwargs)
 
+        # Temperature
         x = list( Data.objects.order_by('-created_at').values_list('created_at', flat=True) )
         y = list( Data.objects.order_by('-created_at').values_list('temperature', flat=True) )
-
         trace1 = go.Scatter(x=x, y=y, marker={'color': 'red', 'symbol': 104, 'size': 10},
                             mode="lines",  name='1st Trace')
 
-        data=go.Data([trace1])
-        layout=go.Layout(title="Monitoring", xaxis={'title':'datetime'}, yaxis={'title':'temperature'})
-        figure=go.Figure(data=data,layout=layout)
+        data = go.Data([trace1])
+        layout = go.Layout(title="Temperature", xaxis={'title':'datetime'}, yaxis={'title':'temperature C'})
+        figure = go.Figure(data=data,layout=layout)
         div = opy.plot(figure, auto_open=False, output_type='div')
 
-        context['graph'] = div
+        context['temperature_graph'] = div
+
+        # Humidity
+        x = list( Data.objects.order_by('-created_at').values_list('created_at', flat=True) )
+        y = list( Data.objects.order_by('-created_at').values_list('humidity', flat=True) )
+        trace1 = go.Scatter(x=x, y=y, marker={'color': 'blue', 'symbol': 104, 'size': 10},
+                            mode="lines",  name='2nd Trace')
+
+        data = go.Data([trace1])
+        layout = go.Layout(title="Humidity", xaxis={'title':'datetime'}, yaxis={'title':'Humidity %'})
+        figure = go.Figure(data=data,layout=layout)
+        div = opy.plot(figure, auto_open=False, output_type='div')
+
+        context['humidity_graph'] = div
 
         return context
 

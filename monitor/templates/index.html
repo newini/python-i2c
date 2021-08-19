@@ -2,10 +2,17 @@
 
 {% block content %}
 
-  {% if graph %}
-    <div style="width:600;height:500">
-      {{ graph|safe }}
+  {% if temperature_graph %}
+    <div style="width:800;height:600">
+      {{ temperature_graph|safe }}
     </div>
   {% endif %}
+
+  {% if humidity_graph %}
+    <div style="width:800;height:600">
+      {{ humidity_graph|safe }}
+    </div>
+  {% endif %}
+
 
 {% endblock %}
