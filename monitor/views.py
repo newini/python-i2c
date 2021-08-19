@@ -24,10 +24,11 @@ class Graph(TemplateView):
         x = list( Data.objects.order_by('-created_at').values_list('created_at', flat=True) )
         y = list( Data.objects.order_by('-created_at').values_list(column_name, flat=True) )
         trace1 = go.Scatter(x=x, y=y, marker={'color': 'blue', 'symbol': 104, 'size': 10},
-                            mode="lines",  name='3rd Trace')
+                            mode="lines", name='3rd Trace')
 
         data = go.Data([trace1])
-        layout = go.Layout(title=title, xaxis={'title': 'datetime'}, yaxis={'title': y_axis_name})
+        layout = go.Layout(title=title, xaxis={'title': 'datetime'}, yaxis={'title': y_axis_name},
+                template='plotly_dark')
         figure = go.Figure(data=data,layout=layout)
         div = opy.plot(figure, auto_open=False, output_type='div')
 

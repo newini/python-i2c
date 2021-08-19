@@ -1,3 +1,10 @@
+@media (prefers-color-scheme: dark) {
+  body {
+    color: #eee;
+    background: #121212;
+  }
+}
+
 .sidebar-nav {
   margin-top: 20px;
   padding: 0;
