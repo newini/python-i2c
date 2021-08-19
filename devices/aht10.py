@@ -72,8 +72,9 @@ class AHT10:
                 temperature = temperature_data/(2**20)*200 - 50 # in C
 
                 # Check value
-                if temperature > 85:
-                    logging.warning('AHT10 temperature value is too hish.')
+                if (temperature < -45 or 85 < temperature
+                        or humidity < 5 or 95 < humidity):
+                    logging.warning('AHT10 humidity/temperature value is fake.')
                     self.softReset()
                     humidity = temperature = -1
 
