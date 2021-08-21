@@ -100,7 +100,7 @@ class CCS811:
 
                 # Check value
                 if (eCO2 < 400 or 8192 < eCO2
-                        or TVOC < 0 or 1187 < TVOC:
+                        or TVOC < 0 or 1187 < TVOC):
                     logging.warning('CCS811 eCO2 value is strange.')
                     eCO2 = TVOC = -1
 
