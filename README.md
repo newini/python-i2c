@@ -31,10 +31,8 @@ Data will be saved to `db.sqlite3`.
 
 ### 2.1 Preperation
 - django
-- plotly
-- dash
 ```
-pip3 install django plotly dash
+pip3 install django
 ```
 
 
