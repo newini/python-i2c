@@ -6,40 +6,62 @@
 
   <div class='row'>
     <div class='col-lg-6'>
-      {% if temperature_graph %}
-        <div>
-          {{ temperature_graph|safe }}
-        </div>
-      {% endif %}
+      <div id="temperature_graph"></div>
     </div>
 
     <div class='col-lg-6'>
-      {% if humidity_graph %}
-        <div>
-          {{ humidity_graph|safe }}
-        </div>
-      {% endif %}
+      <div id="humidity_graph"></div>
     </div>
   </div>
 
   <div class='row'>
     <div class='col-lg-6'>
-      {% if eCO2_graph %}
-        <div>
-          {{ eCO2_graph|safe }}
-        </div>
-      {% endif %}
+      <div id="eCO2_graph"></div>
     </div>
 
     <div class='col-lg-6'>
-      {% if TVOC_graph %}
-        <div>
-          {{ TVOC_graph|safe }}
-        </div>
-      {% endif %}
+      <div id="TVOC_graph"></div>
     </div>
   </div>
 
 </div>
+
+<script>
+  data_list = {
+    created_at_list: {{ created_at_list|safe }},
+    temperature_list: {{ temperature_list }},
+    humidity_list: {{ humidity_list }},
+    eCO2_list: {{ eCO2_list }},
+    TVOC_list: {{ TVOC_list }},
+  }
+
+  function create_graph(column_name, title, yaxis_title) {
+    var data = [{
+      x: data_list['created_at_list'],
+      y: data_list[column_name+'_list'],
+    }];
+    var layout = {
+      title: title,
+      xaxis: {
+        title: 'Datetime',
+      },
+      yaxis: {
+        title: yaxis_title,
+      },
+      font: {
+        color: '#f0ffff',
+      },
+      plot_bgcolor: '#1d1d1d',
+      paper_bgcolor: '#1d1d1d',
+    };
+    Plotly.newPlot(column_name+'_graph', data, layout);
+  }
+
+  create_graph('temperature', 'Temperature', 'Temperature [C]');
+  create_graph('humidity', 'Humidity', 'Humidity [C]');
+  create_graph('eCO2', 'eCO2', 'eCO2 [ppm]');
+  create_graph('TVOC', 'TVOC', 'TVOC [ppb]');
+
+</script>
 
 {% endblock %}
