@@ -35,6 +35,8 @@
     TVOC_list: {{ TVOC_list }},
   }
 
+  const dark_theme_md = window.matchMedia("(prefers-color-scheme: dark)");
+
   function create_graph(column_name, title, yaxis_title) {
     var data = [{
       x: data_list['created_at_list'],
@@ -48,12 +50,15 @@
       yaxis: {
         title: yaxis_title,
       },
-      font: {
-        color: '#f0ffff',
-      },
-      plot_bgcolor: '#1d1d1d',
-      paper_bgcolor: '#1d1d1d',
     };
+    // Add dark theme
+    if (dark_theme_md.matches) {
+      layout.font = {
+        color: '#f0ffff',
+      };
+      layout.plot_bgcolor = '#1d1d1d';
+      layout.paper_bgcolor = '#1d1d1d';
+    }
     Plotly.newPlot(column_name+'_graph', data, layout);
   }
 
