@@ -29,6 +29,12 @@ from helpers.influxdbclient import InfluxDBClient
 
 
 #================================================
+# Important (static) variables
+INTERVAL_SECOND = 1.0
+TIMEOUT_SECOND = 60.0
+
+
+#================================================
 # I2C
 DEVICE_BUS0 = 0
 DEVICE_BUS1 = 1
@@ -70,8 +76,8 @@ while (True):
     if humidity == temperature == -1 or eCO2 == TVOC == -1:
         error_cnt += 1
 
-        # Stop if wrong data continous 60 s
-        if error_cnt >= 60:
+        # Stop if wrong data continously
+        if error_cnt >= TIMEOUT_SECOND:
             logging.error('Something wrong. Stop')
             break
 
@@ -85,6 +91,6 @@ while (True):
         idc.write('ccs811', 'eCO2', eCO2)
         idc.write('ccs811', 'TVOC', TVOC)
 
-    # Wait till next second
-    sleep_time = 10**6 - datetime.utcnow().microsecond # in micro second
+    # Wait till next interval second
+    sleep_time = INTERVAL_SECOND * 10**6 - datetime.utcnow().microsecond # in micro second
     time.sleep(sleep_time/10**6) # in second
