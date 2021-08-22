@@ -29,7 +29,7 @@ from helpers.influxdbclient import InfluxDBClient
 
 
 #================================================
-# Static variables
+# I2C
 DEVICE_BUS0 = 0
 DEVICE_BUS1 = 1
 
@@ -49,10 +49,7 @@ ccs811.initialize()
 
 
 #================================================
-# SQLite3
-#con = sqlite3.connect('db.sqlite3')
-#cur = con.cursor()
-
+# Influx DB
 idc = InfluxDBClient()
 
 
@@ -72,20 +69,21 @@ while (True):
     # Check data
     if humidity == temperature == -1 or eCO2 == TVOC == -1:
         error_cnt += 1
+
+        # Stop if wrong data continous 60 s
+        if error_cnt >= 60:
+            logging.error('Something wrong. Stop')
+            break
+
     else:
-        #cur.execute('INSERT INTO monitor_data(created_at, humidity, temperature, eCO2, TVOC) VALUES(?, ?, ?, ?, ?)',
-        #        (datetime.now(JST), humidity, temperature, eCO2, TVOC)
-        #        )
-        #con.commit()
+        if error_cnt > 0:
+            error_cnt = 0
+
+        # Save to Influx DB
         idc.write('aht10', 'temperature', temperature)
         idc.write('aht10', 'humidity', humidity)
         idc.write('ccs811', 'eCO2', eCO2)
         idc.write('ccs811', 'TVOC', TVOC)
-
-    # Stop if wrong data count >= 20
-    if error_cnt >= 20:
-        logging.error('Something wrong. Stop')
-        break
 
     # Wait till next second
     sleep_time = 10**6 - datetime.utcnow().microsecond # in micro second
