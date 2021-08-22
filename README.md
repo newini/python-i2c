@@ -9,6 +9,7 @@
 
 
 ### 1.2 Preperation
+#### 1.2.1 Install python3 pakages
 Used python packages:
 - `pyi2c`: to communicate with I2C devices. This includes `smbus2`
 - `influxdb_client`: to save measurement data to InfluxDB server
@@ -16,6 +17,25 @@ Used python packages:
 Install python packages
 ```
 pip3 install pyi2c influxdb_client
+```
+
+
+#### 1.2.2 Get InfluxDB token
+In shell, type this to add new environment variable.
+```
+export INFLUXDB_TOKEN=your_token_here
+```
+
+Or, create a script file, such as `env.sh`
+```
+#!/bin/bash
+# env.sh
+
+export INFLUXDB_TOKEN=your_token_here
+```
+and type in the shell
+```
+source env.sh
 ```
 
 
@@ -30,19 +50,26 @@ nohup python3 i2c.py > logs/i2c.out &
 ```
 
 
-## 2. Webserver (Not use anymore)
 
-### 2.1 Preperation
+### 2. Data visualization by using InfluxDB
+
+
+
+
+## 3. Webserver (Not use anymore)
+
+### 3.1 Preperation
 - django
 ```
 pip3 install django
 ```
 
 
-### 2.2 Run
+### 3.2 Run
 ```
 ./runserver.sh
 ```
+
 
 
 ## For developers
