@@ -10,9 +10,8 @@
 
 ### 1.2 Preperation
 Used python packages:
-- `pyi2c`
-- `smbus2`
-- `influxdb_client`
+- `pyi2c`: to communicate with I2C devices. This includes `smbus2`
+- `influxdb_client`: to save measurement data to InfluxDB server
 
 Install python packages
 ```
@@ -25,10 +24,13 @@ pip3 install pyi2c influxdb_client
 python3 i2c.py
 ```
 
-Data will be saved to `db.sqlite3`.
+Run in background
+```
+nohup python3 i2c.py > logs/i2c.out &
+```
 
 
-## 2. Webserver
+## 2. Webserver (Not use anymore)
 
 ### 2.1 Preperation
 - django
@@ -44,7 +46,7 @@ pip3 install django
 
 
 ## For developers
-### Reset
+### Reset SQLite3 django model
 ```
 python3 manage.py migrate --fake monitor zero
 find . -path "*/migrations/*.py" -not -name "__init__.py" -delete
