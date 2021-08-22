@@ -24,6 +24,9 @@ import logging, sqlite3, time
 from devices.aht10 import AHT10
 from devices.ccs811 import CCS811
 
+# InfluxDB client
+from helpers.influxdbclient import InfluxDBClient
+
 
 #================================================
 # Static variables
@@ -47,8 +50,10 @@ ccs811.initialize()
 
 #================================================
 # SQLite3
-con = sqlite3.connect('db.sqlite3')
-cur = con.cursor()
+#con = sqlite3.connect('db.sqlite3')
+#cur = con.cursor()
+
+idc = InfluxDBClient()
 
 
 #================================================
@@ -68,10 +73,14 @@ while (True):
     if humidity == temperature == -1 or eCO2 == TVOC == -1:
         error_cnt += 1
     else:
-        cur.execute('INSERT INTO monitor_data(created_at, humidity, temperature, eCO2, TVOC) VALUES(?, ?, ?, ?, ?)',
-                (datetime.now(JST), humidity, temperature, eCO2, TVOC)
-                )
-        con.commit()
+        #cur.execute('INSERT INTO monitor_data(created_at, humidity, temperature, eCO2, TVOC) VALUES(?, ?, ?, ?, ?)',
+        #        (datetime.now(JST), humidity, temperature, eCO2, TVOC)
+        #        )
+        #con.commit()
+        idc.write('aht10', 'temperature', temperature)
+        idc.write('aht10', 'humidity', humidity)
+        idc.write('ccs811', 'eCO2', eCO2)
+        idc.write('ccs811', 'TVOC', TVOC)
 
     # Stop if wrong data count >= 20
     if error_cnt >= 20:
