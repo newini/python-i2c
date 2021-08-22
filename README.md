@@ -10,12 +10,13 @@
 
 ### 1.2 Preperation
 Used python packages:
-- pyi2c
-- smbus2
+- `pyi2c`
+- `smbus2`
+- `influxdb_client`
 
 Install python packages
 ```
-pip3 install pyi2c
+pip3 install pyi2c influxdb_client
 ```
 
 
