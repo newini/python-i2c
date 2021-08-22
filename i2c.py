@@ -16,7 +16,8 @@ __status__      = "Production"
 
 
 #================================================
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
+JST = timezone(timedelta(hours=+9), 'JST') # Timezone
 import logging, sqlite3, time
 
 # Devices
@@ -26,7 +27,8 @@ from devices.ccs811 import CCS811
 
 #================================================
 # Static variables
-DEVICE_BUS = 0
+DEVICE_BUS0 = 0
+DEVICE_BUS1 = 1
 
 # Logging
 logging.basicConfig(
@@ -35,11 +37,11 @@ logging.basicConfig(
         )
 
 # AHT10
-aht10 = AHT10(DEVICE_BUS)
+aht10 = AHT10(DEVICE_BUS0)
 aht10.initialize()
 
 # CCS811
-ccs811 = CCS811(DEVICE_BUS)
+ccs811 = CCS811(DEVICE_BUS1)
 ccs811.initialize()
 
 
@@ -66,13 +68,13 @@ while (True):
     if humidity == temperature == -1 or eCO2 == TVOC == -1:
         error_cnt += 1
     else:
-        cur.execute('INSERT INTO monitor_data (created_at, humidity, temperature, eCO2, TVOC) VALUES (?, ?, ?, ?, ?)',
-                (datetime.now(), humidity, temperature, eCO2, TVOC)
+        cur.execute('INSERT INTO monitor_data(created_at, humidity, temperature, eCO2, TVOC) VALUES(?, ?, ?, ?, ?)',
+                (datetime.now(JST), humidity, temperature, eCO2, TVOC)
                 )
         con.commit()
 
-    # Stop if wrong data count >= 10
-    if error_cnt >= 10:
+    # Stop if wrong data count >= 20
+    if error_cnt >= 20:
         logging.error('Something wrong. Stop')
         break
 
