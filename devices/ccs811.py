@@ -15,8 +15,10 @@ class CCS811:
     Address is 0x5a, or 0x5b
 
     CAUTION
-    DO NOT USE single transaction such as bus.write_byte, it does not work.
-    Use bus.i2c_rdwr( i2c_msg ), instead.
+    1. DO NOT USE single transaction such as bus.write_byte, it does not work.
+       Use bus.i2c_rdwr( i2c_msg ), instead.
+    2. Accuracy N/A. The value does not math with other sensors. See
+       https://www.jaredwolff.com/finding-the-best-tvoc-sensor-ccs811-vs-bme680-vs-sgp30/
     """
     def __init__(self, bus_n=0, addr=0x5a):
         self._i2cdevice = I2CDevice(bus_n, addr)
