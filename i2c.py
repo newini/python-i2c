@@ -30,7 +30,7 @@ from helpers.influxdbclient import InfluxDBClient
 
 #================================================
 # Important (static) variables
-INTERVAL_SECOND = 1.0
+INTERVAL_SECOND = 5.0
 TIMEOUT_SECOND = 60.0
 
 
@@ -65,9 +65,11 @@ error_cnt = 0
 while (True):
     current_datetime_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
+    # AHT10
     humidity, temperature = aht10.getHumidityTemperature()
-
+    # CCS811
     eCO2, TVOC = ccs811.getECO2TVOC()
+
     logging.info('Humidity: {0:.2f} %, Temperature: {1:.2f} C, eCO2: {2} ppm, TVOC: {3} ppb'.format(
         humidity, temperature, eCO2, TVOC)
         )
@@ -84,6 +86,9 @@ while (True):
     else:
         if error_cnt > 0:
             error_cnt = 0
+
+        # Write environment data to CCS811
+        ccs811.writeEnvironmentData(humidity, temperature)
 
         # Save to Influx DB
         idc.write('aht10', 'temperature', temperature)

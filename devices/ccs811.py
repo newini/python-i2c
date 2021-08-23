@@ -26,6 +26,7 @@ class CCS811:
         # 0: write, 001: every second, 0: nINT interrupt disable, 0: operate normally, 00: nothing
         self._MEAS_MODE_CMD = 0b0001_0000 # 0x10
         self._RESULT_ADDR = 0x02
+        self._ENV_DATA = 0x05 # Temperature and Humidity data can be written to enable compensatio
         self._SW_RESET = 0xff
         logging.info('CCS811 created.')
 
@@ -47,6 +48,17 @@ class CCS811:
         self._i2cdevice.write(data)
         time.sleep(.1) # .1 s
         logging.info('CCS811 did soft reset and return to boot mode.')
+
+    def writeEnvironmentData(self, humidity, temperature):
+        if humidity > 0 and temperature > -25:
+            write_data = [
+                    self._ENV_DATA,
+                    int( (humidity*2**9)/(2**8) ),
+                    int( (humidity*2**9)%(2**8) ),
+                    int( ((temperature+25)*2**9)/(2**8) ),
+                    int( ((temperature+25)*2**9)%(2**8) ),
+                    ]
+            self._i2cdevice.write(write_data)
 
     # Return True when there is no problem
     def interpretStatus(self, status, error_id):
