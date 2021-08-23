@@ -14,6 +14,7 @@ class AHT10:
     """
     AHT10 Class to get humidity and temperature.
     Address is 0x38
+    Accuracy: humidity +-2% (max +-3%), temperature +-0.3 C (max +- 0.4 C)
     """
     def __init__(self, bus_n=0, addr=0x38):
         self._i2cdevice     = I2CDevice(bus_n, addr)
@@ -68,7 +69,7 @@ class AHT10:
                 temperature_data = ((read_data[3] & 0x0f) << 16) + (read_data[4] << 8) + read_data[5]
 
                 # Convert
-                humidity = humidity_data/(2**20)*100 # in %
+                humidity = humidity_data/(2**20)*100 # Relative humidity in %
                 temperature = temperature_data/(2**20)*200 - 50 # in C
 
                 # Check value

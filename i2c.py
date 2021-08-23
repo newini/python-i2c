@@ -70,7 +70,7 @@ while (True):
     # CCS811
     eCO2, TVOC = ccs811.getECO2TVOC()
 
-    logging.info('Humidity: {0:.2f} %, Temperature: {1:.2f} C, eCO2: {2} ppm, TVOC: {3} ppb'.format(
+    logging.info('Humidity: {0:.0f} ± 2%, Temperature: {1:.1f} ± 0.3 C, eCO2: {2} ppm, TVOC: {3} ppb'.format(
         humidity, temperature, eCO2, TVOC)
         )
 
