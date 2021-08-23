@@ -78,8 +78,8 @@ while (True):
     if humidity == temperature == -1 or eCO2 == TVOC == -1:
         error_cnt += 1
 
-        # Stop if wrong data continously
-        if error_cnt >= TIMEOUT_SECOND:
+        # Stop if emits wrong data continously
+        if error_cnt >= TIMEOUT_SECOND/INTERVAL_SECOND:
             logging.error('Something wrong. Stop')
             break
 
