@@ -38,6 +38,16 @@ class AHT10:
         time.sleep(.1) # .1 s
         logging.info('AHT10 did soft reset.')
 
+    def checkStatus(self, status):
+        is_ok = False
+        if getBit(status, 7) == 1:
+            logging.warning('AHT10 is busy')
+        else if getBit(status, 3) == 0:
+            logging.warning('AHT10 calibration is not enabled')
+        else:
+            is_ok = True
+        return is_ok
+
     def getHumidityTemperature(self):
         # Write trigger measurement
         write_data = [
@@ -61,9 +71,7 @@ class AHT10:
 
             # Treat status code
             status = read_data[0]
-            if getBit(status, 7) == 1:
-                logging.warning('AHT10 is busy')
-            else:
+            if self.checkStatus(status):
                 # Fill data
                 humidity_data = (read_data[1] << 12) + (read_data[2] << 4) + (read_data[3] & 0xf0)
                 temperature_data = ((read_data[3] & 0x0f) << 16) + (read_data[4] << 8) + read_data[5]
