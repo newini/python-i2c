@@ -9,15 +9,17 @@ from pyi2c import I2CDevice, getBit
 class CCS811:
     """
     CCS811 -- the board name is CJMCU-811 --
-    can measure equivalent CO2 (eCO2) in ppm
-    and Total Volatile Organic Compound (TVOC) in ppb.
+    can measure equivalent Total Volatile Organic Compund (eTVOC) in ppb (0~32768)
+    and equivalent CO2 (eCO2) in ppm(400~29206).
 
     Address is 0x5a, or 0x5b
+    Firmware version is 2.0.0
 
     CAUTION
     1. DO NOT USE single transaction such as bus.write_byte, it does not work.
        Use bus.i2c_rdwr( i2c_msg ), instead.
-    2. Accuracy N/A. The value does not math with other sensors. See
+    2. The value is 'equivalent'. eCO2 is calculated from eTVOC. So, ignore eCO2 value.
+    3. Accuracy N/A. The value does not math with other sensors. See
        https://www.jaredwolff.com/finding-the-best-tvoc-sensor-ccs811-vs-bme680-vs-sgp30/
     """
     def __init__(self, bus_n=0, addr=0x5a):
@@ -113,8 +115,8 @@ class CCS811:
                 raw_adc = (read_data[6] & 0b0000_0011) + read_data[7]
 
                 # Check value
-                if (eCO2 < 400 or 8192 < eCO2
-                        or TVOC < 0 or 1187 < TVOC):
+                if (eCO2 < 400 or 29206 < eCO2
+                        or TVOC < 0 or 32768 < TVOC):
                     logging.warning('CCS811 eCO2 value is strange.')
                     eCO2 = TVOC = -1
 

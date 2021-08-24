@@ -86,7 +86,9 @@ python3 manage.py migrate --fake-initial
 
 ## Datasheets
 - [AHT10](https://server4.eca.ir/eshop/AHT10/Aosong_AHT10_en_draft_0c.pdf)
-- [CCS811](https://cdn.sparkfun.com/assets/learn_tutorials/1/4/3/CCS811_Datasheet-DS000459.pdf)
+- [CCS811 for v2.x.x](https://cdn.sparkfun.com/assets/2/c/c/6/5/CN04-2019_attachment_CCS811_Datasheet_v1-06.pdf)
+- [CCS811 for v1.x.x](https://cdn.sparkfun.com/assets/learn_tutorials/1/4/3/CCS811_Datasheet-DS000459.pdf)
+
 
 
 ## Reference
