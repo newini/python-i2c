@@ -42,8 +42,9 @@ class AHT10:
         is_ok = False
         if getBit(status, 7) == 1:
             logging.warning('AHT10 is busy')
-        else if getBit(status, 3) == 0:
+        elif getBit(status, 3) == 0:
             logging.warning('AHT10 calibration is not enabled')
+            self.softReset()
         else:
             is_ok = True
         return is_ok
@@ -79,6 +80,10 @@ class AHT10:
                 # Convert
                 humidity = humidity_data/(2**20)*100 # Relative humidity in %
                 temperature = temperature_data/(2**20)*200 - 50 # in C
+
+                # My calibration
+                # Cause, the value is higher than other sensor
+                temperature -= 1
 
                 # Check value
                 if (temperature < -45 or 85 < temperature
