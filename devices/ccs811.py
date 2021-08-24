@@ -93,7 +93,7 @@ class CCS811:
             is_ok = True
         return is_ok
 
-    def getECO2TVOC(self):
+    def getECO2ETVOC(self):
         # Select result register address
         # and read 8 bytes data rapidly
         read_data = self._i2cdevice.writeread(self._RESULT_ADDR, 8)
@@ -109,14 +109,13 @@ class CCS811:
             error_id = read_data[5]
             if self.interpretStatus(status, error_id):
                 # Fill data
-                eCO2 = (read_data[0] << 8) + read_data[1] # equivalent CO2. from 400 ppm to 8192 ppm
-                TVOC = (read_data[2] << 8) + read_data[3] # Total Volatile Organic Compound. from 0 ppb to 1187 ppb
+                eCO2 = (read_data[0] << 8) + read_data[1] # from 400 ppm to 29206 ppm
+                TVOC = (read_data[2] << 8) + read_data[3] # from 0 ppb to 32768 ppb
                 current = read_data[6] & 0b1111_1100
                 raw_adc = (read_data[6] & 0b0000_0011) + read_data[7]
 
                 # Check value
-                if (eCO2 < 400 or 29206 < eCO2
-                        or TVOC < 0 or 32768 < TVOC):
+                if (TVOC < 0 or 32768 < TVOC):
                     logging.warning('CCS811 eCO2 value is strange.')
                     eCO2 = TVOC = -1
 

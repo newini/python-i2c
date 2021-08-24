@@ -68,14 +68,14 @@ while (True):
     # AHT10
     humidity, temperature = aht10.getHumidityTemperature()
     # CCS811
-    eCO2, TVOC = ccs811.getECO2TVOC()
+    eCO2, eTVOC = ccs811.getECO2ETVOC() # Not use eCO2 value
 
-    logging.info('Humidity: {0:.0f} ± 2%, Temperature: {1:.1f} ± 0.3 C, eCO2: {2} ppm, TVOC: {3} ppb'.format(
-        humidity, temperature, eCO2, TVOC)
+    logging.info('Humidity: {0:.0f} ± 2%, Temperature: {1:.1f} ± 0.3 C, eTVOC: {2} ppb'.format(
+        humidity, temperature, eTVOC)
         )
 
     # Check data
-    if humidity == temperature == -1 or eCO2 == TVOC == -1:
+    if humidity == temperature == -1 or eTVOC == -1:
         error_cnt += 1
 
         # Stop if emits wrong data continously
@@ -93,8 +93,7 @@ while (True):
         # Save to Influx DB
         idc.write('aht10', 'temperature', temperature)
         idc.write('aht10', 'humidity', humidity)
-        idc.write('ccs811', 'eCO2', eCO2)
-        idc.write('ccs811', 'TVOC', TVOC)
+        idc.write('ccs811', 'eTVOC', eTVOC)
 
     # Wait till next interval second
     sleep_time = INTERVAL_SECOND * 10**6 - datetime.utcnow().microsecond # in micro second
