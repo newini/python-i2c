@@ -32,6 +32,7 @@ from helpers.influxdbclient import InfluxDBClient
 # Parser for arguments
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--INFLUXDB_TOKEN', help='InfluxDB token')
+parser.add_argument('--logging_filename', help='Logging output file name')
 args = parser.parse_args()
 if args.INFLUXDB_TOKEN:
     os.environ['INFLUXDB_TOKEN'] = args.INFLUXDB_TOKEN
@@ -49,7 +50,9 @@ DEVICE_BUS0 = 0
 DEVICE_BUS1 = 1
 
 # Logging
+logging_filename = args.logging_filename if args.logging_filename else 'logs/i2c.log'
 logging.basicConfig(
+        filename=logging_filename,
         format='%(asctime)s %(levelname)s %(message)s',
         level=logging.DEBUG
         )
