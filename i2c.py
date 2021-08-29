@@ -4,7 +4,6 @@
 """
 Use I2C to read humidity and temperature data, by using smbus2
 """
-
 __author__      = "Eunchong Kim"
 __copyright__   = "Copyright 2021, Eunchong Kim"
 __credits__     = ["Eunchong Kim"]
@@ -15,10 +14,11 @@ __email__       = "chariskimec@gmail.com"
 __status__      = "Production"
 
 
+
 #================================================
 from datetime import datetime, timedelta, timezone
 JST = timezone(timedelta(hours=+9), 'JST') # Timezone
-import logging, sqlite3, time
+import argparse, logging, sqlite3, os, time
 
 # Devices
 from devices.aht10 import AHT10
@@ -26,6 +26,15 @@ from devices.ccs811 import CCS811
 
 # InfluxDB client
 from helpers.influxdbclient import InfluxDBClient
+
+
+#================================================
+# Parser for arguments
+parser = argparse.ArgumentParser(description='Process some integers.')
+parser.add_argument('--INFLUXDB_TOKEN', help='InfluxDB token')
+args = parser.parse_args()
+if args.INFLUXDB_TOKEN:
+    os.environ['INFLUXDB_TOKEN'] = args.INFLUXDB_TOKEN
 
 
 #================================================
