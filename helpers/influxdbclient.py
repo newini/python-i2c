@@ -17,4 +17,7 @@ class InfluxDBClient:
 
     def write(self, point, field, value):
         p = influxdb_client.Point(point).field(field, value)
-        self._write_api.write(bucket=self._bucket, org=self._org, record=p)
+        try:
+            self._write_api.write(bucket=self._bucket, org=self._org, record=p)
+        except Exception as e:
+            logging.error('Cannot write to InfluxDB server. %s' % e)
