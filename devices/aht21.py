@@ -14,23 +14,23 @@ class AHT21:
     Accuracy: humidity +-2% (max +-3%), temperature +-0.3 C (max +- 0.5 C)
     """
     def __init__(self, bus_n=0, addr=0x38):
-        self._i2cdevice     = I2CDevice(bus_n, addr)
-        self._INIT_CMD_LIST = [0x1B, 0x1C, 0x1E]
-        self._GET_STATUS    = 0x71 # to get a Status word
-        self._TRIG_MEAS     = [0xAC, 0x33, 0x00] # Trigger measurement. need to wait at least 80 ms
+        self._i2cdevice         = I2CDevice(bus_n, addr)
+        self._INIT_CMD_LIST     = [0x1B, 0x1C, 0x1E]
+        self._GET_STATUS        = 0x71 # to get a Status word
+        self._TRIG_MEAS_LIST    = [0xAC, 0x33, 0x00] # Trigger measurement. need to wait at least 80 ms
 
-        logging.info('AHT10 created.')
+        logging.info('AHT21 created.')
 
     def initialize(self):
         self._i2cdevice.write(self._INIT_CMD_LIST)
         time.sleep(.1) # .1 s
         logging.info('AHT21 initialized.')
 
-    def checkStatus(self):
+    def getStatus(self):
         status = self._i2cdevice.writeread(self._GET_STATUS, 1)
-        self.processStatus(status)
+        return status
 
-    def processStatus(self, status):
+    def checkStatus(self, status):
         is_ok = False
         if getBit(status, 7) == 1:
             logging.warning('AHT21 is busy')
@@ -43,17 +43,12 @@ class AHT21:
 
     def getHumidityTemperature(self):
         # Write trigger measurement
-        write_data = [
-            self._TRIG_MEAS,
-            self._DATA0,
-            self._DATA1
-            ]
-        self._i2cdevice.write(write_data)
+        self._i2cdevice.write(self._TRIG_MEAS_LIST)
 
         # Sleep at least 80 ms
         time.sleep(.1) # .1 s
 
-        # AHT10, read 7 bytes of data
+        # read 7 bytes of data
         read_data = self._i2cdevice.read(7)
 
         # Prepare variables
@@ -80,7 +75,7 @@ class AHT21:
                 # Check value
                 if (temperature < -40 or 120 < temperature
                         or humidity < 0 or 100 < humidity):
-                    logging.warning('AHT10 humidity/temperature value is fake.')
+                    logging.warning('AHT21 humidity/temperature value is fake.')
                     self.softReset()
                     humidity = temperature = -1
 
@@ -94,7 +89,6 @@ def main():
             level=logging.DEBUG
             )
     aht21 = AHT21()
-    #aht10.initialize()
     while(True):
         humidity, temperature = aht21.getHumidityTemperature()
         logging.info('Humidity: {0:.2f}%, Temperature: {1:.2f}'.format(humidity, temperature))
