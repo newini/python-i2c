@@ -48,8 +48,9 @@ class AHT21:
         # Sleep at least 80 ms
         time.sleep(.1) # .1 s
 
-        # read 7 bytes of data
+        # read 6 bytes of data
         read_data = self._i2cdevice.read(7)
+        #print(read_data)
 
         # Prepare variables
         humidity = temperature = -1
