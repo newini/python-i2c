@@ -7,15 +7,12 @@ import logging, time
 from pyi2c import I2CDevice, getBit
 
 
-# AHT10 address
-# commands
-
-
 class AHT10:
     """
     AHT10 Class to get humidity and temperature.
     Address is 0x38
     Accuracy: humidity +-2% (max +-3%), temperature +-0.3 C (max +- 0.4 C)
+    Becarefull! one BUS for an AHT10 device! No other device should be connected to the same BUS!
     """
     def __init__(self, bus_n=0, addr=0x38):
         self._i2cdevice         = I2CDevice(bus_n, addr)
