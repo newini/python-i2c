@@ -22,6 +22,7 @@ import argparse, logging, sqlite3, os, time
 
 # Devices
 from devices.aht10 import AHT10
+from devices.aht21 import AHT21
 from devices.ccs811 import CCS811
 
 # InfluxDB client
@@ -61,6 +62,10 @@ logging.basicConfig(
 aht10 = AHT10(DEVICE_BUS0)
 aht10.initialize()
 
+# AHT21
+aht21 = AHT21(DEVICE_BUS0)
+#aht21.initialize()
+
 # CCS811
 ccs811 = CCS811(DEVICE_BUS1)
 ccs811.initialize()
@@ -78,16 +83,18 @@ while (True):
     current_datetime_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # AHT10
-    humidity, temperature = aht10.getHumidityTemperature()
+    humidity_aht10, temperature_aht10 = aht10.getHumidityTemperature()
+    # AHT21
+    humidity_aht21, temperature_aht21 = aht21.getHumidityTemperature()
     # CCS811
     eCO2, eTVOC = ccs811.getECO2ETVOC() # Not use eCO2 value
 
-    logging.info('Humidity: {0:.0f} ± 2%, Temperature: {1:.1f} ± 0.3 C, eTVOC: {2} ppb'.format(
-        humidity, temperature, eTVOC)
+    logging.info('AHT10: Humi: {0:.0f}±2%, Temp: {1:.1f}±0.3C, AHT21: Humi: {2:.0f}±2%, Temp: {3:.1f}±0.3C, eTVOC: {4} ppb'.format(
+        humidity_aht10, temperature_aht10, humidity_aht21, temperature_aht21, eTVOC)
         )
 
     # Check data
-    if humidity == temperature == -1 or eTVOC == -1:
+    if humidity_aht10 == temperature_aht21 == -1 or eTVOC == -1:
         error_cnt += 1
 
         # Stop if emits wrong data continously
@@ -100,11 +107,13 @@ while (True):
             error_cnt = 0
 
         # Write environment data to CCS811
-        ccs811.writeEnvironmentData(humidity, temperature)
+        ccs811.writeEnvironmentData(humidity_aht10, temperature_aht10)
 
         # Save to Influx DB
-        idc.write('aht10', 'temperature', temperature)
-        idc.write('aht10', 'humidity', humidity)
+        idc.write('aht10', 'temperature', temperature_aht10)
+        idc.write('aht10', 'humidity', humidity_aht10)
+        idc.write('aht21', 'temperature', temperature_aht21)
+        idc.write('aht21', 'humidity', humidity_aht21)
         idc.write('ccs811', 'eTVOC', eTVOC)
 
     # Wait till next interval second
