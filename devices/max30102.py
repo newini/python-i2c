@@ -9,15 +9,14 @@ from pyi2c import I2CDevice, getBit
 
 class MAX30102:
     """
-    MAX30102 Class to get humidity and temperature.
-    Address is 0x77
-    Accuracy: humidity +-1%, temperature +-1 C
+    MAX30102: High-Sensitivity Pulse Oximeter and
+        Heart-Rate Sensor for Wearable Health
+    Address: 0x57
+    Accuracy:
+    - temperature: -40 ~ 85 +-1 C
     """
-    def __init__(self, bus_n=0, addr=0x77):
+    def __init__(self, bus_n=0, addr=0x57):
         self._i2cdevice         = I2CDevice(bus_n, addr)
-        self._INIT_CMD_LIST     = [0x1B, 0x1C, 0x1E]
-        self._GET_STATUS        = 0x71 # to get a Status word
-        self._TRIG_MEAS_LIST    = [0xAC, 0x33, 0x00] # Trigger measurement. need to wait at least 80 ms
 
         logging.info('MAX30102 created.')
 

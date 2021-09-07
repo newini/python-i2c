@@ -19,9 +19,10 @@ class BME680:
     """
     def __init__(self, bus_n=0, addr=0x77):
         self._i2cdevice         = I2CDevice(bus_n, addr)
-        self._INIT_CMD_LIST     = [0x1B, 0x1C, 0x1E]
-        self._GET_STATUS        = 0x71 # to get a Status word
-        self._TRIG_MEAS_LIST    = [0xAC, 0x33, 0x00] # Trigger measurement. need to wait at least 80 ms
+        self._SOFT_RESET_LIST   = [0xE0, 0xB6]
+        self._OP_MODE_ADDR      = 0x74
+        self._SLEEP_MODE        = 0x00
+        self._FORCED_MODE       = 0x01
 
         logging.info('BME680 created.')
 
