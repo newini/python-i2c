@@ -89,7 +89,7 @@ def main():
             format='%(asctime)s %(levelname)s %(message)s',
             level=logging.DEBUG
             )
-    aht21 = AHT21()
+    aht21 = AHT21(1)
     while(True):
         humidity, temperature = aht21.getHumidityTemperature()
         logging.info('Humidity: {0:.2f}%, Temperature: {1:.2f}'.format(humidity, temperature))

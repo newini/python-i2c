@@ -63,7 +63,7 @@ aht10 = AHT10(DEVICE_BUS0)
 aht10.initialize()
 
 # AHT21
-aht21 = AHT21(DEVICE_BUS0)
+aht21 = AHT21(DEVICE_BUS1)
 #aht21.initialize()
 
 # CCS811
