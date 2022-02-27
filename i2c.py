@@ -17,7 +17,8 @@ __status__      = "Production"
 
 #================================================
 from datetime import datetime
-import argparse, logging, sqlite3, os, time
+import argparse, logging, sqlite3, os, time, sys
+from logging.handlers import TimedRotatingFileHandler
 
 # Devices
 from devices.aht10 import AHT10
@@ -53,9 +54,13 @@ DEVICE_BUS1 = 1
 # Logging
 logging_filename = args.logging_filename if args.logging_filename else 'logs/i2c.log'
 logging.basicConfig(
-        filename=logging_filename,
-        format='%(asctime)s %(levelname)s %(message)s',
-        level=logging.DEBUG
+        level=logging.DEBUG,
+        format='%(asctime)s [%(levelname)s] %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=[
+            logging.StreamHandler(sys.stdout),
+            TimedRotatingFileHandler(logging_filename, when='W0')
+            ]
         )
 
 # AHT10
