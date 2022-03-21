@@ -141,35 +141,29 @@ while (True):
         humidity_bme680, temperature_bme680, pressure_bme680, iaq)
         )
 
-    # Check data
-    if humidity_aht10 == temperature_aht21 == -1 or eTVOC == -1:
-        error_cnt += 1
 
-        # Stop if emits wrong data continously
-        if error_cnt >= TIMEOUT_SECOND/INTERVAL_SECOND:
-            logging.error('Something wrong. Stop')
-            break
-
-    else:
-        if error_cnt > 0:
-            error_cnt = 0
+    # Save to Influx DB
+    if temperature_aht10 != -1 and humidity_aht10 != -1:
+        idc.write('aht10', 'temperature', temperature_aht10)
+        idc.write('aht10', 'humidity', humidity_aht10)
 
         # Write environment data to CCS811
         ccs811.writeEnvironmentData(humidity_aht10, temperature_aht10)
 
-        # Save to Influx DB
-        idc.write('aht10', 'temperature', temperature_aht10)
-        idc.write('aht10', 'humidity', humidity_aht10)
+    if eTVOC != -1:
         idc.write('ccs811', 'eTVOC', eTVOC)
-        if humidity_aht21 != -1 and temperature_aht21 != -1:
-            idc.write('aht21', 'temperature', temperature_aht21)
-            idc.write('aht21', 'humidity', humidity_aht21)
-        if humidity_bme680 != -1 and temperature_bme680 != -1 and pressure_bme680 != -1:
-            idc.write('bme680', 'temperature', temperature_bme680)
-            idc.write('bme680', 'humidity', humidity_bme680)
-            idc.write('bme680', 'pressure', pressure_bme680)
-        if iaq != -1:
-            idc.write('bme680', 'iaq', iaq)
+
+    if humidity_aht21 != -1 and temperature_aht21 != -1:
+        idc.write('aht21', 'temperature', temperature_aht21)
+        idc.write('aht21', 'humidity', humidity_aht21)
+
+    if humidity_bme680 != -1 and temperature_bme680 != -1 and pressure_bme680 != -1:
+        idc.write('bme680', 'temperature', temperature_bme680)
+        idc.write('bme680', 'humidity', humidity_bme680)
+        idc.write('bme680', 'pressure', pressure_bme680)
+
+    if iaq != -1:
+        idc.write('bme680', 'iaq', iaq)
 
 
     # Wait till next interval second
