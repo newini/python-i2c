@@ -3,9 +3,16 @@
 
 ## 1. I2C
 
-### 1.1 I2C Devices
+### 1.0 I2C Devices
 - AHT10: measures Humidity in % and temperature in Celcius.
 - CCS811(board name is CJMCU-811): measures equivalent CO2 in ppm and Total Volatile Organic Compound in ppb.
+
+
+
+### 1.1 Install linux i2c tools
+```
+sudo apt install i2c-tools
+```
 
 
 ### 1.2 Preperation
@@ -15,6 +22,10 @@ Used python packages:
 - `influxdb_client`: to save measurement data to InfluxDB server
 
 Install python packages
+```
+pip install -r requirements.txt
+```
+or
 ```
 pip3 install pyi2c influxdb_client
 ```
