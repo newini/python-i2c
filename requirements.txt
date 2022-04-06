@@ -1,0 +1,3 @@
+pyi2c
+bme680
+influxdb_client
