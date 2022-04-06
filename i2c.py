@@ -16,6 +16,7 @@ __status__      = "Production"
 
 
 #================================================
+from pathlib import Path
 from datetime import datetime
 import argparse, logging, sqlite3, os, time, sys
 from logging.handlers import TimedRotatingFileHandler
@@ -52,7 +53,8 @@ DEVICE_BUS0 = 0
 DEVICE_BUS1 = 1
 
 # Logging
-logging_filename = args.logging_filename if args.logging_filename else 'logs/i2c.log'
+Path('log').mkdir(parents=True, exist_ok=True)
+logging_filename = args.logging_filename if args.logging_filename else 'log/i2c.log'
 logging.basicConfig(
         level=logging.DEBUG,
         format='%(asctime)s [%(levelname)s] %(message)s',
