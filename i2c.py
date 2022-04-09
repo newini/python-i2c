@@ -8,7 +8,7 @@ __author__      = "Eunchong Kim"
 __copyright__   = "Copyright 2021, Eunchong Kim"
 __credits__     = ["Eunchong Kim"]
 __license__     = "GPL"
-__version__     = "1.0.0"
+__version__     = "1.0.1"
 __maintainer__  = "Eunchong Kim"
 __email__       = "chariskimec@gmail.com"
 __status__      = "Production"
@@ -20,6 +20,7 @@ from pathlib import Path
 from datetime import datetime
 import argparse, logging, sqlite3, os, time, sys
 from logging.handlers import TimedRotatingFileHandler
+import smbus
 
 # Devices
 from devices.aht10 import AHT10
@@ -50,7 +51,7 @@ TIMEOUT_SECOND = 60.0
 #================================================
 # I2C
 DEVICE_BUS0 = 3
-DEVICE_BUS1 = 5
+DEVICE_BUS1 = 3
 
 # Logging
 Path('log').mkdir(parents=True, exist_ok=True)
@@ -66,8 +67,8 @@ logging.basicConfig(
         )
 
 # AHT10
-aht10 = AHT10(DEVICE_BUS0)
-aht10.initialize()
+#aht10 = AHT10(DEVICE_BUS0)
+#aht10.initialize()
 
 # AHT21
 aht21 = AHT21(DEVICE_BUS1)
@@ -78,7 +79,7 @@ ccs811 = CCS811(DEVICE_BUS1)
 ccs811.initialize()
 
 # BME680
-bme680_ = bme680.BME680(0x77)
+bme680_ = bme680.BME680(0x77, smbus.SMBus(DEVICE_BUS1))
 bme680_.set_humidity_oversample(bme680.OS_2X)
 bme680_.set_pressure_oversample(bme680.OS_4X)
 bme680_.set_temperature_oversample(bme680.OS_8X)
@@ -107,7 +108,7 @@ while (True):
     current_datetime_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
     # AHT10
-    humidity_aht10, temperature_aht10 = aht10.getHumidityTemperature()
+    #humidity_aht10, temperature_aht10 = aht10.getHumidityTemperature()
     # AHT21
     humidity_aht21, temperature_aht21 = aht21.getHumidityTemperature()
     # CCS811
@@ -133,11 +134,18 @@ while (True):
                 gas_res_score = gas_resistance/bme680_gas_res_baseline * (1-bme680_humidity_weight) * 100
                 iaq = humidity_score + gas_res_score
 
-    logging.info("""AHT10: Humi: {0:.0f}±2%, Temp: {1:.1f}±0.3C,
-            \tAHT21: Humi: {2:.0f}±2%, Temp: {3:.1f}±0.3C,
-            \tCCS811: eTVOC: {4} ppb,
-            \tBME680: Humi: {5:.0f}±3%, Temp: {6:.1f}±1C, Pres: {7}, IAQ: {8}""".format(
-        humidity_aht10, temperature_aht10,
+#    logging.info("""AHT10: Humi: {0:.0f}±2%, Temp: {1:.1f}±0.3C,
+#            \tAHT21: Humi: {2:.0f}±2%, Temp: {3:.1f}±0.3C,
+#            \tCCS811: eTVOC: {4} ppb,
+#            \tBME680: Humi: {5:.0f}±3%, Temp: {6:.1f}±1C, Pres: {7}, IAQ: {8}""".format(
+#        humidity_aht10, temperature_aht10,
+#        humidity_aht21, temperature_aht21,
+#        eTVOC,
+#        humidity_bme680, temperature_bme680, pressure_bme680, iaq)
+#        )
+    logging.info("""AHT21: Humi: {0:.0f}±2%, Temp: {1:.1f}±0.3C,
+            \tCCS811: eTVOC: {2} ppb,
+            \tBME680: Humi: {3:.0f}±3%, Temp: {4:.1f}±1C, Pres: {5}, IAQ: {6}""".format(
         humidity_aht21, temperature_aht21,
         eTVOC,
         humidity_bme680, temperature_bme680, pressure_bme680, iaq)
@@ -145,12 +153,12 @@ while (True):
 
 
     # Save to Influx DB
-    if temperature_aht10 != -1 and humidity_aht10 != -1:
-        idc.write('aht10', 'temperature', temperature_aht10)
-        idc.write('aht10', 'humidity', humidity_aht10)
+    #if temperature_aht10 != -1 and humidity_aht10 != -1:
+    #    idc.write('aht10', 'temperature', temperature_aht10)
+    #    idc.write('aht10', 'humidity', humidity_aht10)
 
-        # Write environment data to CCS811
-        ccs811.writeEnvironmentData(humidity_aht10, temperature_aht10)
+    #    # Write environment data to CCS811
+    #    ccs811.writeEnvironmentData(humidity_aht10, temperature_aht10)
 
     if eTVOC != -1:
         idc.write('ccs811', 'eTVOC', eTVOC)
