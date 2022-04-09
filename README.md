@@ -6,6 +6,7 @@
 ### 1.0 I2C Devices
 - AHT10: measures Humidity in % and temperature in Celcius.
 - CCS811(board name is CJMCU-811): measures equivalent CO2 in ppm and Total Volatile Organic Compound in ppb.
+  - Notice: nWAKE should be LOW
 
 
 
