@@ -13,6 +13,23 @@
 ```
 sudo apt install i2c-tools
 ```
+then, try
+```
+i2cdetect -y 0
+
+#### Trouble shooter
+```
+If there is error,
+```
+Error: Could not open file `/dev/i2c-3': Permission denied
+Run as root?
+```
+add your user to `i2c` group,
+```
+sudo usermod -aG i2c your_username
+```
+and reboot.
+
 
 
 ### 1.2 Preperation
