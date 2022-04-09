@@ -49,8 +49,8 @@ TIMEOUT_SECOND = 60.0
 
 #================================================
 # I2C
-DEVICE_BUS0 = 0
-DEVICE_BUS1 = 1
+DEVICE_BUS0 = 3
+DEVICE_BUS1 = 5
 
 # Logging
 Path('log').mkdir(parents=True, exist_ok=True)
