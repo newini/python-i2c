@@ -15,24 +15,23 @@ __status__      = "Production"
 
 
 
-#================================================
-from pathlib import Path
+# ================================================
+import argparse, json, logging, sqlite3, os, time, smbus, sys
 from datetime import datetime
-import argparse, logging, sqlite3, os, time, sys
 from logging.handlers import TimedRotatingFileHandler
-import smbus
-
-# Devices
-from devices.aht10 import AHT10
-from devices.aht21 import AHT21
-from devices.ccs811 import CCS811
-import bme680
+from pathlib import Path
 
 # InfluxDB client
 from helpers.influxdbclient import InfluxDBClient
 
+# Device
+from devices.aht10 import AHT10
+from devices.aht21 import AHT21
+from devices.ccs811 import CCS811
+import bme680 as BME680
 
-#================================================
+
+# -------------------------
 # Parser for arguments
 parser = argparse.ArgumentParser(description='Process some integers.')
 parser.add_argument('--INFLUXDB_TOKEN', help='InfluxDB token')
@@ -42,17 +41,7 @@ if args.INFLUXDB_TOKEN:
     os.environ['INFLUXDB_TOKEN'] = args.INFLUXDB_TOKEN
 
 
-#================================================
-# Important (static) variables
-INTERVAL_SECOND = 5.0
-TIMEOUT_SECOND = 60.0
-
-
-#================================================
-# I2C
-DEVICE_BUS0 = 3
-DEVICE_BUS1 = 3
-
+# -------------------------
 # Logging
 Path('log').mkdir(parents=True, exist_ok=True)
 logging_filename = args.logging_filename if args.logging_filename else 'log/i2c.log'
@@ -66,116 +55,154 @@ logging.basicConfig(
             ]
         )
 
-# AHT10
-#aht10 = AHT10(DEVICE_BUS0)
-#aht10.initialize()
 
-# AHT21
-aht21 = AHT21(DEVICE_BUS1)
-#aht21.initialize()
+# -------------------------
+# Important (static) variables
+INTERVAL_SECOND = 5.0
+TIMEOUT_SECOND = 60.0
 
-# CCS811
-ccs811 = CCS811(DEVICE_BUS1)
-ccs811.initialize()
 
-# BME680
-bme680_ = bme680.BME680(0x77, smbus.SMBus(DEVICE_BUS1))
-bme680_.set_humidity_oversample(bme680.OS_2X)
-bme680_.set_pressure_oversample(bme680.OS_4X)
-bme680_.set_temperature_oversample(bme680.OS_8X)
-bme680_.set_filter(bme680.FILTER_SIZE_3)
-bme680_.set_gas_status(bme680.ENABLE_GAS_MEAS)
-bme680_.set_gas_heater_temperature(320)
-bme680_.set_gas_heater_duration(150)
-bme680_.select_gas_heater_profile(0)
-bme680_burn_in_time = 300
-bme680_gas_res_list = []
-bme680_humidity_list = []
-bme680_gas_res_baseline = 0
-bme680_humidity_baseline = 0
-bme680_humidity_weight = 0.25
+# -------------------------
+# Load config
+json_file = open('config.json')
+config = json.load(json_file)
 
-#================================================
+
+# ================================================
+# Initialize
+# -------------------------
 # Influx DB
 idc = InfluxDBClient()
 
 
-#================================================
+# -------------------------
+# I2C
+device_list = []
+for config_device in config['devices']:
+    # AHT10
+    if config_device['name'] == 'AHT10':
+        aht10 = AHT10(config_device['bus'])
+        aht10.initialize()
+
+    # AHT21
+    elif config_device['name'] == 'AHT21':
+        aht21 = AHT21(config_device['bus'])
+        #aht21.initialize()
+
+    # CCS811
+    elif config_device['name'] == 'CCS811':
+        ccs811 = CCS811(config_device['bus'])
+        ccs811.initialize()
+
+    # BME680
+    elif config_device['name'] == 'BME680':
+        bme680 = BME680.BME680(0x77, smbus.SMBus(config_device['bus']))
+        bme680.set_humidity_oversample(BME680.OS_2X)
+        bme680.set_pressure_oversample(BME680.OS_4X)
+        bme680.set_temperature_oversample(BME680.OS_8X)
+        bme680.set_filter(BME680.FILTER_SIZE_3)
+        bme680.set_gas_status(BME680.ENABLE_GAS_MEAS)
+        bme680.set_gas_heater_temperature(320)
+        bme680.set_gas_heater_duration(150)
+        bme680.select_gas_heater_profile(0)
+        bme680_burn_in_time = 300
+        bme680_gas_res_list = []
+        bme680_humidity_list = []
+        bme680_gas_res_baseline = 0
+        bme680_humidity_baseline = 0
+        bme680_humidity_weight = 0.25
+
+
+# ================================================
 # Loop
 start_time = time.time()
 error_cnt = 0
 while (True):
     current_datetime_str = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # AHT10
-    #humidity_aht10, temperature_aht10 = aht10.getHumidityTemperature()
-    # AHT21
-    humidity_aht21, temperature_aht21 = aht21.getHumidityTemperature()
-    # CCS811
-    eCO2, eTVOC = ccs811.getECO2ETVOC() # Not use eCO2 value
-    # BME680
-    humidity_bme680 = temperature_bme680 = pressure_bme680 = iaq = -1
-    if bme680_.get_sensor_data():
-        temperature_bme680 = bme680_.data.temperature
-        pressure_bme680 = bme680_.data.pressure
-        humidity_bme680 = bme680_.data.humidity
-        if bme680_.data.heat_stable:
-            gas_resistance = bme680_.data.gas_resistance
-            curr_time = time.time()
-            if curr_time - start_time < bme680_burn_in_time:
-                bme680_humidity_list.append(humidity_bme680)
-                bme680_gas_res_list.append(gas_resistance)
-            else:
-                if bme680_gas_res_baseline == 0:
-                    bme680_gas_res_baseline = sum(bme680_gas_res_list)/len(bme680_gas_res_list)
-                if bme680_humidity_baseline == 0:
-                    bme680_humidity_baseline = sum(bme680_humidity_list)/len(bme680_humidity_list)
-                humidity_score = humidity_bme680/bme680_humidity_baseline * bme680_humidity_weight * 100
-                gas_res_score = gas_resistance/bme680_gas_res_baseline * (1-bme680_humidity_weight) * 100
-                iaq = humidity_score + gas_res_score
+    result_list = []
+    for config_device in config['devices']:
+        # AHT10
+        if config_device['name'] == 'AHT10':
+            humidity, temperature = aht10.getHumidityTemperature()
+            temp_dict = {
+                    'name': config_device['name'],
+                    'measures': {'humidity': humidity, 'temperature': temperature}
+                    }
+            result_list.append(temp_dict)
+            logging.info(f'AHT10: Humid: {humidity:.0f}±2%, Tempe: {temperature:.1f}±0.3C')
 
-#    logging.info("""AHT10: Humi: {0:.0f}±2%, Temp: {1:.1f}±0.3C,
-#            \tAHT21: Humi: {2:.0f}±2%, Temp: {3:.1f}±0.3C,
-#            \tCCS811: eTVOC: {4} ppb,
-#            \tBME680: Humi: {5:.0f}±3%, Temp: {6:.1f}±1C, Pres: {7}, IAQ: {8}""".format(
-#        humidity_aht10, temperature_aht10,
-#        humidity_aht21, temperature_aht21,
-#        eTVOC,
-#        humidity_bme680, temperature_bme680, pressure_bme680, iaq)
-#        )
-    logging.info("""AHT21: Humi: {0:.0f}±2%, Temp: {1:.1f}±0.3C,
-            \tCCS811: eTVOC: {2} ppb,
-            \tBME680: Humi: {3:.0f}±3%, Temp: {4:.1f}±1C, Pres: {5}, IAQ: {6}""".format(
-        humidity_aht21, temperature_aht21,
-        eTVOC,
-        humidity_bme680, temperature_bme680, pressure_bme680, iaq)
-        )
+        # AHT21
+        if config_device['name'] == 'AHT21':
+            humidity, temperature = aht21.getHumidityTemperature()
+            temp_dict = {
+                    'name': config_device['name'],
+                    'measures': {'humidity': humidity, 'temperature': temperature}
+                    }
+            result_list.append(temp_dict)
+            logging.info(f'AHT21: humidity: {humidity:.0f}±2%, Tempe: {temperature:.1f}±0.3C')
+
+        # CCS811
+        if config_device['name'] == 'CCS811':
+            eCO2, eTVOC = ccs811.getECO2ETVOC() # Not use eCO2 value
+            temp_dict = {
+                    'name': config_device['name'],
+                    'measures': {'eTVOC': eTVOC}
+                    }
+            result_list.append(temp_dict)
+            logging.info(f'CCS811: eTVOC: {eTVOC} ppb')
+
+        # BME680
+        if config_device['name'] == 'BME680':
+            humidity = temperature = pressure = iaq = -1
+            if bme680.get_sensor_data():
+                temperature = bme680.data.temperature
+                pressure = bme680.data.pressure
+                humidity = bme680.data.humidity
+                if bme680.data.heat_stable:
+                    gas_resistance = bme680.data.gas_resistance
+                    curr_time = time.time()
+                    if curr_time - start_time < bme680_burn_in_time:
+                        bme680_humidity_list.append(humidity)
+                        bme680_gas_res_list.append(gas_resistance)
+                    else:
+                        if bme680_gas_res_baseline == 0:
+                            bme680_gas_res_baseline = sum(bme680_gas_res_list)/len(bme680_gas_res_list)
+                        if bme680_humidity_baseline == 0:
+                            bme680_humidity_baseline = sum(bme680_humidity_list)/len(bme680_humidity_list)
+                        humidity_score = humidity/bme680_humidity_baseline * bme680_humidity_weight * 100
+                        gas_res_score = gas_resistance/bme680_gas_res_baseline * (1-bme680_humidity_weight) * 100
+                        iaq = humidity_score + gas_res_score
+            temp_dict = {
+                    'name': config_device['name'],
+                    'measures': {
+                        'humidity': humidity, 'temperature': temperature,
+                        'pressure': pressure, 'iaq': iaq
+                        }
+                    }
+            result_list.append(temp_dict)
+            logging.info(f"""BME680:
+                    Humid: {humidity:.0f}±3%, Tempe: {temperature:.1f}±1C,
+                    Press: {pressure}, IAQ: {iaq}"""
+                    )
 
 
+    # --------------------------
     # Save to Influx DB
-    #if temperature_aht10 != -1 and humidity_aht10 != -1:
-    #    idc.write('aht10', 'temperature', temperature_aht10)
-    #    idc.write('aht10', 'humidity', humidity_aht10)
+    for result in result_list:
 
-    #    # Write environment data to CCS811
-    #    ccs811.writeEnvironmentData(humidity_aht10, temperature_aht10)
-
-    if eTVOC != -1:
-        idc.write('ccs811', 'eTVOC', eTVOC)
-
-    if humidity_aht21 != -1 and temperature_aht21 != -1:
-        idc.write('aht21', 'temperature', temperature_aht21)
-        idc.write('aht21', 'humidity', humidity_aht21)
-
-    if humidity_bme680 != -1 and temperature_bme680 != -1 and pressure_bme680 != -1:
-        idc.write('bme680', 'temperature', temperature_bme680)
-        idc.write('bme680', 'humidity', humidity_bme680)
-        idc.write('bme680', 'pressure', pressure_bme680)
-
-    if iaq != -1:
-        idc.write('bme680', 'iaq', iaq)
+        for k, v in result['measures'].items():
+            if v != -1:
+                idc.write(result['name'], k, v)
+                #print(result['name'], k, v)
 
 
+    # Write environment data to CCS811
+    #if result['name'] == 'CCS811':
+    #    ccs811.writeEnvironmentData(humidity, temperature)
+
+
+    # --------------------------
     # Wait till next interval second
     sleep_time = INTERVAL_SECOND * 10**6 - datetime.utcnow().microsecond # in micro second
     time.sleep(sleep_time/10**6) # in second
