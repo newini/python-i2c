@@ -1,3 +1,4 @@
-pyi2c
 bme680
 influxdb_client
+luma.oled
+pyi2c

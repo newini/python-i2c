@@ -29,6 +29,9 @@ from devices.aht10 import AHT10
 from devices.aht21 import AHT21
 from devices.ccs811 import CCS811
 import bme680 as BME680
+from luma.core.interface.serial import i2c
+from luma.core.render import canvas
+from luma.oled.device import ssd1306 as SSD1306
 
 
 # -------------------------
@@ -112,6 +115,11 @@ for config_device in config['devices']:
         bme680_humidity_baseline = 0
         bme680_humidity_weight = 0.25
 
+    # SSD1306
+    elif config_device['name'] == 'SSD1306':
+        serial = i2c(port=config_device['bus'], address=int(config_device['address'], 16))
+        ssd1306 = SSD1306(serial)
+
 
 # ================================================
 # Loop
@@ -130,7 +138,7 @@ while (True):
                     'measures': {'humidity': humidity, 'temperature': temperature}
                     }
             result_list.append(temp_dict)
-            logging.info(f'AHT10: Humid: {humidity:.0f}±2%, Tempe: {temperature:.1f}±0.3C')
+            logging.info(f'AHT10: Humid: {humidity:.0f}±2%, Tempe: {temperature:.1f}±0.3°C')
 
         # AHT21
         if config_device['name'] == 'AHT21':
@@ -140,7 +148,7 @@ while (True):
                     'measures': {'humidity': humidity, 'temperature': temperature}
                     }
             result_list.append(temp_dict)
-            logging.info(f'AHT21: humidity: {humidity:.0f}±2%, Tempe: {temperature:.1f}±0.3C')
+            logging.info(f'AHT21: humidity: {humidity:.0f}±2%, Tempe: {temperature:.1f}±0.3°C')
 
         # CCS811
         if config_device['name'] == 'CCS811':
@@ -182,9 +190,16 @@ while (True):
                     }
             result_list.append(temp_dict)
             logging.info(f"""BME680:
-                    Humid: {humidity:.0f}±3%, Tempe: {temperature:.1f}±1C,
-                    Press: {pressure}, IAQ: {iaq}"""
+                    Humid: {humidity:.0f}±3%, Tempe: {temperature:.1f}±1°C,
+                    Press: {pressure}hPa, IAQ: {iaq}"""
                     )
+
+        # SSD1306
+        if config_device['name'] == 'SSD1306':
+            with canvas(ssd1306) as draw:
+                draw.rectangle(ssd1306.bounding_box, outline="white", fill="black")
+                draw.text((10, 20), f'{temperature:.1f}°C, {humidity:.1f}%', fill="white")
+                draw.text((10, 40), f'{pressure:.0f}hPa, {iaq}IAQ', fill="white")
 
 
     # --------------------------
