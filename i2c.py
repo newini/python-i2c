@@ -96,7 +96,7 @@ for config_device in config['devices']:
 
     # BME680
     elif config_device['name'] == 'BME680':
-        bme680 = BME680.BME680(0x77, smbus.SMBus(config_device['bus']))
+        bme680 = BME680.BME680(int(config_device['address'], 16), smbus.SMBus(config_device['bus']))
         bme680.set_humidity_oversample(BME680.OS_2X)
         bme680.set_pressure_oversample(BME680.OS_4X)
         bme680.set_temperature_oversample(BME680.OS_8X)

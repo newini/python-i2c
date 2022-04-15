@@ -2,11 +2,18 @@
     "devices": [
         {
             "name": "AHT21",
-            "bus": 3
+            "bus": 3,
+            "address": "0x38"
         },
         {
             "name": "BME680",
-            "bus": 3
+            "bus": 3,
+            "address": "0x77"
+        },
+        {
+            "name": "SSD1306",
+            "bus": 3,
+            "address": "0x3c"
         }
     ]
 }
