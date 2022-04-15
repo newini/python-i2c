@@ -77,7 +77,7 @@ class AHT21:
                 if (temperature < -40 or 120 < temperature
                         or humidity < 0 or 100 < humidity):
                     logging.warning('AHT21 humidity/temperature value is fake.')
-                    self.softReset()
+                    # self.softReset()
                     humidity = temperature = -1
 
         return humidity, temperature
