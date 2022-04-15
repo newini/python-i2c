@@ -141,4 +141,4 @@ cython_debug/
 nohup.out
 
 # logs
-logs
+log
