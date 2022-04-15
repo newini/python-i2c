@@ -4,9 +4,12 @@
 ## 1. I2C
 
 ### 1.0 I2C Devices
-- AHT10: measures Humidity in % and temperature in Celcius.
-- CCS811(board name is CJMCU-811): measures equivalent CO2 in ppm and Total Volatile Organic Compound in ppb.
+- AHT10: measures humidity in % and temperature in Celcius. Not use anymore.
+- AHT21: measures humidity in % and temperature in Celcius.
+- CCS811(board name is CJMCU-811): measures equivalent CO2 in ppm and Total Volatile Organic Compound in ppb. Not use anymore.
   - Notice: nWAKE should be LOW
+- BME680: measure temperature, humidity, pressure, air quarity.
+- SSD1306: 128x64 pixel OLED display
 
 
 
@@ -17,6 +20,7 @@ sudo apt install i2c-tools
 then, try
 ```
 i2cdetect -y 0
+
 
 #### Trouble shooter
 ```
