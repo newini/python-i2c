@@ -200,7 +200,7 @@ while (True):
                 draw.rectangle(ssd1306.bounding_box, outline="white", fill="black")
                 draw.text((10, 0), f'{now_dt_str}', fill="white")
                 draw.text((10, 20), f'{temperature:.1f}°C, {humidity:.1f}%', fill="white")
-                draw.text((10, 40), f'{pressure:.0f}hPa, {iaq}IAQ', fill="white")
+                draw.text((10, 40), f'{pressure:.0f}hPa, {iaq:.0f}IAQ', fill="white")
 
 
     # --------------------------
