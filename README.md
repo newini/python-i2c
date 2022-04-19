@@ -79,7 +79,8 @@ python3 i2c.py
 
 Run in background
 ```
-nohup python3 i2c.py > logs/i2c.out &
+nohup 2>&1 python3 i2c.py &
+# nohup python3 i2c.py > logs/i2c.out &
 ```
 
 
