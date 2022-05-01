@@ -11,6 +11,11 @@
             "address": "0x77"
         },
         {
+            "name": "MCP9808",
+            "bus": 3,
+            "address": "0x18"
+        },
+        {
             "name": "SSD1306",
             "bus": 3,
             "address": "0x3c"
