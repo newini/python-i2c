@@ -28,6 +28,7 @@ from helpers.influxdbclient import InfluxDBClient
 from devices.aht10 import AHT10
 from devices.aht21 import AHT21
 from devices.ccs811 import CCS811
+from devices.mcp9809 import MCP9808
 import bme680 as BME680
 from luma.core.interface.serial import i2c
 from luma.core.render import canvas
@@ -97,6 +98,11 @@ for config_device in config['devices']:
         ccs811 = CCS811(config_device['bus'])
         ccs811.initialize()
 
+    # CCS811
+    elif config_device['name'] == 'MCP9808':
+        mcp9809 = MCP9808(config_device['bus'])
+        mcp9809.initialize()
+
     # BME680
     elif config_device['name'] == 'BME680':
         bme680 = BME680.BME680(int(config_device['address'], 16), smbus.SMBus(config_device['bus']))
@@ -159,6 +165,16 @@ while (True):
                     }
             result_list.append(temp_dict)
             logging.info(f'CCS811: eTVOC: {eTVOC} ppb')
+
+        # MCP9808
+        if config_device['name'] == 'MCP9808':
+            temperature = mcp9809.getTemperature() #
+            temp_dict = {
+                    'name': config_device['name'],
+                    'measures': {'temperature': temperature}
+                    }
+            result_list.append(temp_dict)
+            logging.info(f'MCP9808: temperature: {temperature:.1f}±0.25°C')
 
         # BME680
         if config_device['name'] == 'BME680':
