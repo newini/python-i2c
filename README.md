@@ -9,6 +9,7 @@
 - CCS811(board name is CJMCU-811): measures equivalent CO2 in ppm and Total Volatile Organic Compound in ppb. Not use anymore.
   - Notice: nWAKE should be LOW
 - BME680: measure temperature, humidity, pressure, air quarity.
+- MCP9808: measure temperature
 - SSD1306: 128x64 pixel OLED display
 
 
