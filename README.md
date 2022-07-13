@@ -85,6 +85,17 @@ nohup 2>&1 python3 i2c.py &
 ```
 
 
+### 1.4 Startup on boot
+Edit `/etc/rc.local` and add below lines
+```
+# -----------------------------------------
+# i2c
+cd __current_directory_path__
+source startup.sh
+# -----------------------------------------
+```
+
+
 
 ### 2. Data visualization by using InfluxDB
 
