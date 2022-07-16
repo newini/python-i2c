@@ -91,7 +91,7 @@ Edit `/etc/rc.local` and add below lines
 # -----------------------------------------
 # i2c
 cd __current_directory_path__
-source startup.sh
+sudo -u __username__ ./startup.sh
 # -----------------------------------------
 ```
 
