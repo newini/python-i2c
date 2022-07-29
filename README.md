@@ -95,6 +95,11 @@ sudo -u __username__ ./startup.sh
 # -----------------------------------------
 ```
 
+To check rc.local, run
+```
+sudo systemctl status rc-local
+```
+
 
 
 ### 2. Data visualization by using InfluxDB
